@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { SidebarItemProps } from '../dashboard/page';
 import { LucideIcon } from 'lucide-react';
+import Layout from '@/components/layout/Layout';
+import { useRouter } from 'next/navigation';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: SidebarItemProps) => (
   <div 
@@ -43,11 +45,12 @@ interface NavItemProps {
   icon: LucideIcon;
   label: string;
   status?: string;
+  onClick?: () => void,
   active?: boolean;
 }
 
-const NavItem = ({ icon: Icon, label, status, active = false }: NavItemProps) => (
-  <div className={`flex items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition-colors ${active ? 'bg-zinc-800/60 text-white' : 'text-zinc-400 hover:bg-zinc-800/30'}`}>
+const NavItem = ({ icon: Icon, label, onClick, status, active = false }: NavItemProps) => (
+  <div onClick={onClick} className={`flex items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition-colors ${active ? 'bg-zinc-800/60 text-white' : 'text-zinc-400 hover:bg-zinc-800/30'}`}>
     <div className="flex items-center space-x-3">
       <Icon size={18} />
       <span className="text-[13px] font-medium">{label}</span>
@@ -63,76 +66,12 @@ const Toggle = ({ enabled }: { enabled: boolean }) => (
 );
 
 const Page = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('settings');
+  const router = useRouter()
 
   return (
-    <div className="flex h-screen bg-[#090a0c] text-zinc-200 font-sans overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-60 border-r border-zinc-800 bg-[#090a0c] flex flex-col transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="h-[64px] flex items-center px-6 shrink-0 border-b border-zinc-800/40">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center">
-              <span className="text-black font-black text-sm">T</span>
-            </div>
-            <span className="text-lg font-bold text-white tracking-tight">TeachShare</span>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-3 mt-4 space-y-0.5 overflow-y-auto">
-          <p className="px-3 text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2">Navigation</p>
-          <SidebarItem icon={LayoutDashboard} label="Dashboard" onClick={() => setActiveTab('dashboard')} />
-          <SidebarItem icon={Files} label="My Resources" onClick={() => setActiveTab('resources')} />
-          <SidebarItem icon={Users} label="Community" onClick={() => setActiveTab('community')} />
-          <SidebarItem icon={Archive} label="Repository" onClick={() => setActiveTab('repository')} />
-          <SidebarItem icon={Wand2} label="AI Generator" />
-          <SidebarItem icon={MessageSquare} label="Messages" />
-          <SidebarItem icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
-        </nav>
-
-        <div className="p-4 space-y-2 border-t border-zinc-800/60">
-          <button className="w-full flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 py-2.5 rounded-lg font-bold text-[13px] transition-all">
-            <Plus size={16} />
-            <span>Upload Resource</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Container */}
+    <Layout>
+  
       <main className="flex-1 flex flex-col min-w-0 bg-[#090a0c]">
-        {/* Header */}
-        <header className="h-[64px] border-b border-zinc-800/80 flex items-center justify-between px-4 lg:px-8 shrink-0 bg-[#090a0c]">
-          <div className="flex items-center flex-1">
-            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 mr-2 text-zinc-400">
-              <Menu size={20} />
-            </button>
-            <div className="relative w-full max-w-xl">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" size={15} />
-              <input 
-                type="text" 
-                placeholder="Search resources, educators, or topics..." 
-                className="w-full bg-zinc-900/40 border border-zinc-800/50 rounded-full py-1.5 pl-10 pr-4 text-[13px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 placeholder:text-zinc-600 transition-all"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4 ml-4">
-            <button className="p-2 text-zinc-400 hover:text-white transition-colors"><Bell size={18} /></button>
-            <div className="flex items-center space-x-3 border-l border-zinc-800 pl-4 h-8 cursor-pointer group">
-              <div className="text-right hidden sm:block">
-                <p className="text-[13px] font-bold text-white leading-none group-hover:text-emerald-400 transition-colors">Xasler</p>
-                <p className="text-[10px] text-zinc-500 font-medium mt-1">Software Instructor</p>
-              </div>
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Xasler" className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-800" alt="Avatar" />
-            </div>
-          </div>
-        </header>
-
         {/* Settings Content */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-8">
           <div className="max-w-6xl mx-auto space-y-6">
@@ -181,7 +120,7 @@ const Page = () => {
                   <NavItem icon={Lock} label="Security" status="Password" />
                   <NavItem icon={Database} label="Data & exports" status="Backups" />
                   <div className="mt-4 pt-2 border-t border-zinc-800/60">
-                    <NavItem icon={LogOut} label="Logout" />
+                    <NavItem onClick={() => router.push("/")}  icon={LogOut} label="Logout" />
                   </div>
                 </div>
               </div>
@@ -377,7 +316,7 @@ const Page = () => {
           </div>
         </div>
       </main>
-    </div>
+    </Layout>
   );
 };
 

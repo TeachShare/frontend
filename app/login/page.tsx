@@ -45,7 +45,7 @@ const Page = () => {
 
       <main className="relative z-10 max-w-4xl mx-auto px-6 py-2 flex flex-col items-center w-full">
         {/* Back Navigation */}
-        <button className="self-start flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-6 text-sm group ml-2 md:ml-12">
+        <button onClick={() => router.back()} className="self-start flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-6 text-sm group ml-2 md:ml-12">
           <ArrowLeft size={16} />
           <span className="font-medium">Back</span>
         </button>

@@ -25,6 +25,7 @@ import {
   Layers,
 } from "lucide-react";
 import { SidebarItemProps } from "../dashboard/page";
+import Layout from "@/components/layout/Layout";
 
 const SidebarItem = ({
   icon: Icon,
@@ -200,97 +201,9 @@ const Page = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#090a0c] text-zinc-200 font-sans overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-60 border-r border-zinc-800 bg-[#090a0c] flex flex-col transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
-      >
-        <div className="h-[64px] flex items-center px-6 shrink-0 border-b border-zinc-800/40">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center">
-              <span className="text-black font-black text-sm">T</span>
-            </div>
-            <span className="text-lg font-bold text-white tracking-tight">
-              TeachShare
-            </span>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-3 mt-4 space-y-0.5 overflow-y-auto">
-          <p className="px-3 text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2">
-            Navigation
-          </p>
-          <SidebarItem icon={LayoutDashboard} label="Dashboard" />
-          <SidebarItem icon={Files} label="My Resources" />
-          <SidebarItem icon={Users} label="Community" />
-          <SidebarItem icon={Archive} label="Repository" active />
-          <SidebarItem icon={Wand2} label="AI Generator" />
-          <SidebarItem icon={MessageSquare} label="Messages" />
-          <SidebarItem icon={Settings} label="Settings" />
-        </nav>
-
-        <div className="p-4 space-y-2 border-t border-zinc-800/60">
-          <button className="w-full flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 py-2.5 rounded-lg font-bold text-[13px] transition-all">
-            <Plus size={16} />
-            <span>Upload Resource</span>
-          </button>
-        </div>
-      </aside>
-
+    <Layout>
       {/* Main Container */}
       <main className="flex-1 flex flex-col min-w-0 bg-[#090a0c]">
-        {/* Header */}
-        <header className="h-[64px] border-b border-zinc-800/80 flex items-center justify-between px-4 lg:px-8 shrink-0 bg-[#090a0c]">
-          <div className="flex items-center flex-1">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 mr-2 text-zinc-400"
-            >
-              <Menu size={20} />
-            </button>
-            <div className="relative w-full max-w-xl">
-              <Search
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500"
-                size={15}
-              />
-              <input
-                type="text"
-                placeholder="Search resources, educators, or topics..."
-                className="w-full bg-zinc-900/40 border border-zinc-800/50 rounded-full py-1.5 pl-10 pr-4 text-[13px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 placeholder:text-zinc-600 transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4 ml-4">
-            <button className="p-2 text-zinc-400 hover:text-white transition-colors">
-              <Bell size={18} />
-            </button>
-            <div className="flex items-center space-x-3 border-l border-zinc-800 pl-4 h-8">
-              <div className="text-right hidden sm:block">
-                <p className="text-[13px] font-bold text-white leading-none">
-                  Xasler
-                </p>
-                <p className="text-[10px] text-zinc-500 font-medium mt-1">
-                  Software Instructor
-                </p>
-              </div>
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Xasler"
-                className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-800"
-                alt="Avatar"
-              />
-            </div>
-          </div>
-        </header>
-
         {/* Repository Content */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -453,7 +366,7 @@ const Page = () => {
           </div>
         </div>
       </main>
-    </div>
+    </Layout>
   );
 };
 
