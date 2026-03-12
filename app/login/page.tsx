@@ -16,13 +16,40 @@ import { useRouter } from 'next/navigation';
 
 const Page = () => {
   const router = useRouter();
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('')
   const [view, setView] = useState<string>('login');
   const toggleView = (target: string) => setView(target);
 
 
-  const hanleAuthButton = () => {
+  const handleAuthButton = async(e: React.FormEvent) => {
+     e.preventDefault();
+
       if(view === 'login'){
-         router.push('/dashboard')
+          try {
+            const res = await fetch('http://localhost:5000/api/v1/auth/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                email: email,
+                password: password
+              }),
+
+              credentials: 'include'
+            });
+
+            const data = await res.json();
+
+            if(data.success){
+                router.push('/dashboard')
+            } else {
+                alert(data.message)
+            }
+        } catch(err){
+          console.log(err)
+        } 
       }
   }
 
@@ -45,7 +72,7 @@ const Page = () => {
 
       <main className="relative z-10 max-w-4xl mx-auto px-6 py-2 flex flex-col items-center w-full">
         {/* Back Navigation */}
-        <button onClick={() => router.back()} className="self-start flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-6 text-sm group ml-2 md:ml-12">
+        <button onClick={() => router.push("/")} className="self-start flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-6 text-sm group ml-2 md:ml-12">
           <ArrowLeft size={16} />
           <span className="font-medium">Back</span>
         </button>
@@ -86,7 +113,7 @@ const Page = () => {
           </div>
 
           {/* Form */}
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleAuthButton}>
             
             {view === 'register' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -124,6 +151,8 @@ const Page = () => {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-[#484f58]" size={16} />
                 <input 
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder={view === 'login' ? "name@school.edu" : "example@school.edu"}
                   className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-white placeholder-[#484f58] focus:outline-none focus:border-[#238636] transition-all"
                 />
@@ -151,6 +180,8 @@ const Page = () => {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#484f58]" size={16} />
                   <input 
                     type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder={view === 'login' ? "Enter your password" : "Create a strong password"}
                     className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-white placeholder-[#484f58] focus:outline-none focus:border-[#238636] transition-all"
                   />
@@ -198,7 +229,6 @@ const Page = () => {
             {/* GitHub Green Submit Button */}
             <button 
               type="submit"
-              onClick={hanleAuthButton}
               className="w-full bg-[#238636] hover:bg-[#2ea043] active:scale-[0.98] text-white font-bold py-3.5 rounded-xl transition-all shadow-lg mt-4 text-sm"
             >
               {view === 'login' ? 'Login' : 'Create account'}

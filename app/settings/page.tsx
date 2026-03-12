@@ -68,6 +68,15 @@ const Toggle = ({ enabled }: { enabled: boolean }) => (
 const Page = () => {
   const router = useRouter()
 
+  const handleLogout = async() => {
+       await fetch('http://localhost:5000/api/v1/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+       });
+
+       router.push('/login')
+  }
+
   return (
     <Layout>
   
@@ -120,7 +129,7 @@ const Page = () => {
                   <NavItem icon={Lock} label="Security" status="Password" />
                   <NavItem icon={Database} label="Data & exports" status="Backups" />
                   <div className="mt-4 pt-2 border-t border-zinc-800/60">
-                    <NavItem onClick={() => router.push("/")}  icon={LogOut} label="Logout" />
+                    <NavItem onClick={handleLogout}  icon={LogOut} label="Logout" />
                   </div>
                 </div>
               </div>
