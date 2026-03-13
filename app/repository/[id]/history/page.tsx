@@ -71,23 +71,23 @@ const VersionHistoryPage = () => {
 
   return (
     <Layout>
-      <main className="flex-1 bg-[#090a0c] overflow-y-auto">
+      <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] overflow-y-auto transition-colors duration-300">
         <div className="max-w-6xl mx-auto p-8 space-y-8">
           
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest mb-2 transition-colors duration-300">
                 <span>Resource Repository</span>
                 <span>/</span>
-                <span className="text-zinc-300">Version History</span>
+                <span className="text-zinc-900 dark:text-zinc-300">Version History</span>
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Version History</h1>
-              <p className="text-zinc-500 text-sm mt-1">Review every edit from the first version to the most recent, and safely restore older versions.</p>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight transition-colors duration-300">Version History</h1>
+              <p className="text-zinc-500 dark:text-zinc-500 text-sm mt-1 transition-colors duration-300">Review every edit from the first version to the most recent, and safely restore older versions.</p>
             </div>
             <button 
               onClick={() => router.back()}
-              className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 text-zinc-400 px-4 py-2 rounded-lg text-xs font-bold hover:text-white transition-all"
+              className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 px-4 py-2 rounded-lg text-xs font-bold hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
             >
               <ArrowLeft size={14} />
               Back to resource
@@ -100,39 +100,39 @@ const VersionHistoryPage = () => {
           </div>
 
           {/* Resource Info Card */}
-          <div className="bg-[#121417] border border-zinc-800/60 rounded-xl p-6 flex flex-col md:flex-row justify-between gap-6">
+          <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 flex flex-col md:flex-row justify-between gap-6 transition-colors duration-300">
             <div className="space-y-4">
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-xl font-bold text-white">Algebra Fundamentals</h2>
-                  <span className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Current version: v5 - Active</span>
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white transition-colors duration-300">Algebra Fundamentals</h2>
+                  <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-widest transition-colors duration-300">Current version: v5 - Active</span>
                 </div>
-                <p className="text-zinc-500 text-xs">Mathematics · Grade 9-10 · Lesson Plan · 2 files · 4.5 rating</p>
+                <p className="text-zinc-500 dark:text-zinc-500 text-xs transition-colors duration-300">Mathematics · Grade 9-10 · Lesson Plan · 2 files · 4.5 rating</p>
               </div>
               <div className="flex gap-2">
                 {['algebra', 'equations', 'assessment', 'classroom activities'].map(tag => (
-                  <span key={tag} className="px-2 py-1 bg-zinc-900 border border-zinc-800 rounded text-[10px] text-zinc-500 font-bold lowercase">{tag}</span>
+                  <span key={tag} className="px-2 py-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded text-[10px] text-zinc-600 dark:text-zinc-500 font-bold lowercase transition-colors duration-300">{tag}</span>
                 ))}
               </div>
             </div>
             <div className="text-right space-y-2">
-              <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Jump to version</p>
+              <p className="text-[10px] font-bold text-zinc-500 dark:text-zinc-600 uppercase tracking-widest transition-colors duration-300">Jump to version</p>
               <div className="relative inline-block text-left">
-                <button className="bg-zinc-950 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-8">
-                  v5 · Updated 2 days ago <ChevronDown size={14} className="text-zinc-600"/>
+                <button className="bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-300 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-8 transition-colors duration-300">
+                  v5 · Updated 2 days ago <ChevronDown size={14} className="text-zinc-500 dark:text-zinc-600"/>
                 </button>
               </div>
-              <p className="text-[9px] text-zinc-600 italic">Every edit creates a new version automatically.</p>
+              <p className="text-[9px] text-zinc-500 dark:text-zinc-600 italic transition-colors duration-300">Every edit creates a new version automatically.</p>
             </div>
           </div>
 
           {/* Version List */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-800/50 pb-4">
-              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">All versions from first to most recent</h3>
-              <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800/50 pb-4 transition-colors duration-300">
+              <h3 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest transition-colors duration-300">All versions from first to most recent</h3>
+              <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-500 transition-colors duration-300">
                 <span>Order:</span>
-                <button className="text-zinc-300 font-bold flex items-center gap-1">Oldest to newest <ChevronDown size={12}/></button>
+                <button className="text-zinc-900 dark:text-zinc-300 font-bold flex items-center gap-1 transition-colors duration-300">Oldest to newest <ChevronDown size={12}/></button>
               </div>
             </div>
 
@@ -140,48 +140,50 @@ const VersionHistoryPage = () => {
               <div key={v.id} className="relative group">
                 {/* Timeline connector line */}
                 {i !== versions.length - 1 && (
-                  <div className="absolute left-[7px] top-10 w-[2px] h-full bg-zinc-800/50 group-hover:bg-blue-500/20 transition-colors" />
+                  <div className="absolute left-[7px] top-10 w-[2px] h-full bg-zinc-200 dark:bg-zinc-800/50 group-hover:bg-blue-400 dark:group-hover:bg-blue-500/20 transition-colors duration-300" />
                 )}
                 
-                <div className="grid grid-cols-12 gap-6 bg-[#121417]/50 border border-zinc-800/60 rounded-xl p-6 hover:bg-[#121417] transition-all">
+                <div className="grid grid-cols-12 gap-6 bg-white dark:bg-[#121417]/50 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 hover:bg-zinc-50 dark:hover:bg-[#121417] transition-all duration-300 shadow-sm dark:shadow-none">
                   <div className="col-span-12 lg:col-span-8 space-y-4">
                     <div className="flex items-center gap-3">
-                      <h4 className="text-sm font-bold text-white">{v.id} · {v.title}</h4>
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-widest ${
-                        v.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700/50'
+                      <h4 className="text-sm font-bold text-zinc-900 dark:text-white transition-colors duration-300">{v.id} · {v.title}</h4>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-widest transition-colors duration-300 ${
+                        v.status === 'Active' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-500 border-zinc-200 dark:border-zinc-700/50'
                       }`}>
                         {v.status}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400 leading-relaxed">{v.description}</p>
-                    <div className="flex items-center gap-4 text-[11px] text-zinc-500 font-medium">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed transition-colors duration-300">{v.description}</p>
+                    <div className="flex items-center gap-4 text-[11px] text-zinc-500 dark:text-zinc-500 font-medium transition-colors duration-300">
                       <span className="flex items-center gap-1.5"><User size={12}/> Created by {v.author}</span>
                       <span className="flex items-center gap-1.5"><Clock size={12}/> {v.date}</span>
                       <span className="flex items-center gap-1.5"><FileText size={12}/> {v.files} files · {v.size}</span>
                     </div>
                     <div className="pt-2">
-                      <p className="text-[10px] text-zinc-500"><span className="font-bold text-zinc-600 uppercase mr-2">Summary:</span>{v.summary}</p>
+                      <p className="text-[10px] text-zinc-600 dark:text-zinc-500 transition-colors duration-300"><span className="font-bold text-zinc-800 dark:text-zinc-600 uppercase mr-2 transition-colors duration-300">Summary:</span>{v.summary}</p>
                     </div>
                   </div>
 
                   <div className="col-span-12 lg:col-span-4 flex flex-col justify-center gap-2">
                     <div className="grid grid-cols-2 gap-2">
-                      <button className="bg-zinc-900 border border-zinc-800 text-zinc-400 py-2 rounded font-bold text-[11px] hover:text-white transition-all">View</button>
-                      <button className="bg-blue-600/80 text-white py-2 rounded font-bold text-[11px] hover:bg-blue-500 transition-all">Compare with current</button>
+                      <button className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 py-2 rounded font-bold text-[11px] hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-300">View</button>
+                      <button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/80 text-white py-2 rounded font-bold text-[11px] dark:hover:bg-blue-500 transition-all duration-300">Compare with current</button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       {v.status !== 'Active' ? (
-                        <button className="bg-emerald-500/80 text-emerald-950 py-2 rounded font-bold text-[11px] hover:bg-emerald-400 transition-all">Restore</button>
+                        <button className="bg-emerald-100 dark:bg-emerald-500/80 text-emerald-800 dark:text-emerald-950 py-2 rounded font-bold text-[11px] hover:bg-emerald-200 dark:hover:bg-emerald-400 transition-all duration-300">Restore</button>
                       ) : (
-                        <button className="bg-zinc-900 border border-zinc-800 text-zinc-600 py-2 rounded font-bold text-[11px] cursor-not-allowed" disabled>Download</button>
+                        <button className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600 py-2 rounded font-bold text-[11px] cursor-not-allowed transition-colors duration-300" disabled>Download</button>
                       )}
-                      <button className={`py-2 rounded font-bold text-[11px] transition-all ${
-                        v.status === 'Active' ? 'bg-rose-500/80 text-white hover:bg-rose-400' : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+                      <button className={`py-2 rounded font-bold text-[11px] transition-all duration-300 ${
+                        v.status === 'Active' 
+                          ? 'bg-rose-500 hover:bg-rose-600 dark:bg-rose-500/80 text-white dark:hover:bg-rose-400' 
+                          : 'bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800'
                       }`}>
                         {v.status === 'Active' ? 'Delete' : 'Download'}
                       </button>
                     </div>
-                    <button className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-2 hover:text-zinc-400 transition-all">View change summary</button>
+                    <button className="text-[10px] text-zinc-500 dark:text-zinc-600 font-bold uppercase tracking-widest mt-2 hover:text-zinc-700 dark:hover:text-zinc-400 transition-all duration-300">View change summary</button>
                   </div>
                 </div>
               </div>
@@ -189,11 +191,11 @@ const VersionHistoryPage = () => {
           </div>
 
           {/* Footer Info */}
-          <div className="flex justify-between items-center text-[11px] text-zinc-600 font-bold uppercase tracking-widest pt-8 border-t border-zinc-800/50">
+          <div className="flex justify-between items-center text-[11px] text-zinc-500 dark:text-zinc-600 font-bold uppercase tracking-widest pt-8 border-t border-zinc-200 dark:border-zinc-800/50 transition-colors duration-300">
             <span>Showing versions 1-5 · All changes are stored safely</span>
             <div className="flex items-center gap-4">
               <span>Need to roll back completely?</span>
-              <button className="text-blue-500 hover:text-blue-400">Restore</button>
+              <button className="text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300">Restore</button>
             </div>
           </div>
         </div>

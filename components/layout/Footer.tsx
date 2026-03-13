@@ -1,20 +1,29 @@
-"use client"
+"use client";
 import { Github, Heart, Linkedin } from "lucide-react";
 import React from "react";
+import logo from "@/public/logos/logo.svg"
+import Image from "next/image"
 
 const Footer = () => {
   return (
-    <footer className="pt-20 pb-8 bg-[#0f111a]">
+    <footer className="pt-20 pb-8 bg-zinc-50 dark:bg-[#0f111a] transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="bg-[#161b22] rounded-xl p-8 mb-8 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="bg-white dark:bg-[#161b22] border border-zinc-200 dark:border-transparent rounded-xl p-8 mb-8 flex flex-col md:flex-row items-center justify-between gap-8 transition-colors duration-300">
           <div className="space-y-4 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2">
-              <div className="w-6 h-6 bg-[#72b37d] rounded flex items-center justify-center">
-                <div className="w-3 h-3 bg-[#161b22] transform rotate-45 rounded-sm"></div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="w-8 h-8 rounded flex items-center justify-center">
+                <Image 
+                  alt="teachshareLogo" 
+                  src={logo} 
+                  width={30} 
+                  height={30} 
+                />
               </div>
-              <span className="text-lg font-bold text-white">TeachShare</span>
+              <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white transition-colors duration-300">
+                TeachShare
+              </span>
             </div>
-            <p className="text-[#8b949e] text-xs max-w-sm">
+            <p className="text-zinc-600 dark:text-[#8b949e] text-xs max-w-sm transition-colors duration-300">
               Empowering educators to share what works and spend more time
               teaching.
             </p>
@@ -24,42 +33,42 @@ const Footer = () => {
             <div className="flex gap-4">
               <a
                 href="#"
-                className="p-2 bg-[#21262d] rounded hover:bg-[#30363d] text-[#8b949e] hover:text-white transition-all"
+                className="p-2 bg-zinc-100 dark:bg-[#21262d] rounded hover:bg-zinc-200 dark:hover:bg-[#30363d] text-zinc-600 dark:text-[#8b949e] hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
               >
                 <Heart size={16} />
               </a>
               <a
                 href="#"
-                className="p-2 bg-[#21262d] rounded hover:bg-[#30363d] text-[#8b949e] hover:text-white transition-all"
+                className="p-2 bg-zinc-100 dark:bg-[#21262d] rounded hover:bg-zinc-200 dark:hover:bg-[#30363d] text-zinc-600 dark:text-[#8b949e] hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
               >
                 <Linkedin size={16} />
               </a>
               <a
                 href="#"
-                className="p-2 bg-[#21262d] rounded hover:bg-[#30363d] text-[#8b949e] hover:text-white transition-all"
+                className="p-2 bg-zinc-100 dark:bg-[#21262d] rounded hover:bg-zinc-200 dark:hover:bg-[#30363d] text-zinc-600 dark:text-[#8b949e] hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
               >
                 <Github size={16} />
               </a>
             </div>
-            <div className="flex gap-6 text-xs text-[#8b949e]">
-              <a href="#" className="hover:text-[#72b37d] transition-colors">
+            <div className="flex gap-6 text-xs text-zinc-600 dark:text-[#8b949e] transition-colors duration-300">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
                 About
               </a>
-              <a href="#" className="hover:text-[#72b37d] transition-colors">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
                 Help
               </a>
-              <a href="#" className="hover:text-[#72b37d] transition-colors">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
                 Terms
               </a>
-              <a href="#" className="hover:text-[#72b37d] transition-colors">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
                 Privacy
               </a>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#0d1117] rounded-lg py-3 text-center text-[10px] text-[#6a737d] font-medium tracking-wide">
-          2025 TeachShare. All rights reserved.
+        <div className="bg-zinc-200/50 dark:bg-[#0d1117] rounded-lg py-3 text-center text-[10px] text-zinc-500 dark:text-[#6a737d] font-medium tracking-wide transition-colors duration-300">
+          2026 TeachShare. All rights reserved.
         </div>
       </div>
     </footer>
