@@ -54,18 +54,12 @@ const Navbar = () => {
 
           <div className="flex items-center gap-4 ml-4">
             {/* Optional Theme Toggle for Landing Page */}
-            
+
             <button
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/auth?view=login")}
               className="px-5 py-2 text-sm font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-transparent dark:hover:bg-[#1c2128] rounded-lg transition-all text-zinc-900 dark:text-[#f0f1f4]"
             >
               Login
-            </button>
-            <button
-              onClick={() => router.push("/login?view=register")}
-              className="px-5 py-2 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 dark:bg-[#72b37d] dark:hover:bg-[#86c691] rounded-lg transition-all text-white dark:text-[#0f111a]"
-            >
-              Register
             </button>
           </div>
         </div>
@@ -108,13 +102,13 @@ const Navbar = () => {
           </a>
           <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-3">
             <button
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/auth?view=login")}
               className="w-full py-3 text-sm font-medium text-zinc-900 bg-zinc-200 dark:bg-zinc-800 dark:text-white rounded-lg"
             >
               Login
             </button>
             <button
-              onClick={() => router.push("/login?view=register")}
+              onClick={() => router.push("/auth?view=register")}
               className="w-full py-3 text-sm font-medium bg-emerald-600 text-white dark:bg-[#72b37d] dark:text-[#0f111a] rounded-lg"
             >
               Register

@@ -61,6 +61,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
   ]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -184,7 +185,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
                           {notif.action}
                           {notif.target && (
                             <span className="font-semibold text-zinc-800 dark:text-zinc-200 ml-1">
-                              "{notif.target}"
+                              &quot;{notif.target}&quot;
                             </span>
                           )}
                         </p>

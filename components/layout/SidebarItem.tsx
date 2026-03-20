@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarItemProps } from "@/app/dashboard/page";
+import { SidebarItemProps } from "@/types/sidebar";
 import { usePathname } from "next/navigation";
 import Link from 'next/link';
 

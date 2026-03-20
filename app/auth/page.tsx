@@ -1,0 +1,118 @@
+"use client";
+import React, { Suspense } from "react";
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import logo from "@/public/logos/logo.svg";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Toaster } from "react-hot-toast";
+
+import { LoginForm } from "@/components/sections/auth/LoginForm";
+import { RegisterForm } from "@/components/sections/auth/RegisterForm";
+
+const AuthContent = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const currentView = searchParams.get("view") === "register" ? "register" : "login";
+
+  // Update URL when user clicks toggle
+  const handleToggle = (newView: "login" | "register") => {
+    router.replace(`/auth?view=${newView}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#0d1117] text-zinc-900 dark:text-[#c9d1d9] font-sans selection:bg-emerald-500/30 dark:selection:bg-[#238636]/30 overflow-x-hidden relative flex flex-col transition-colors duration-300">
+      <Toaster position="top-center" reverseOrder={false} />
+
+      <header className="relative z-10 p-6 md:px-12 flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="w-8 h-8 rounded flex items-center justify-center">
+            <Image alt="teachshareLogo" src={logo} width={30} height={30} />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white transition-colors duration-300">
+            TeachShare
+          </span>
+        </div>
+      </header>
+
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-2 flex flex-col items-center w-full">
+        <button
+          onClick={() => router.push("/")}
+          className="self-start flex items-center gap-2 text-zinc-500 dark:text-[#8b949e] hover:text-zinc-900 dark:hover:text-white transition-colors mb-6 text-sm group ml-2 md:ml-12"
+        >
+          <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+          <span className="font-medium">Back</span>
+        </button>
+
+        <div className="w-full max-w-[520px] bg-white dark:bg-[#161b22] border border-zinc-200 dark:border-[#30363d] rounded-[24px] shadow-xl dark:shadow-2xl p-8 md:p-10 animate-in fade-in zoom-in-95 duration-500 transition-colors duration-300">
+          
+          {/* View Toggles */}
+          <div className="bg-zinc-100 dark:bg-[#0d1117] p-1 rounded-xl flex mb-8 border border-zinc-200 dark:border-[#30363d]/50 transition-colors duration-300">
+            <button
+              onClick={() => handleToggle("login")}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all duration-200 ${
+                currentView === "login" ? "bg-emerald-600 dark:bg-[#238636] text-white shadow-sm" : "text-zinc-500 dark:text-[#8b949e] hover:text-zinc-900 dark:hover:text-[#c9d1d9]"
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => handleToggle("register")}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all duration-200 ${
+                currentView === "register" ? "bg-emerald-600 dark:bg-[#238636] text-white shadow-sm" : "text-zinc-500 dark:text-[#8b949e] hover:text-zinc-900 dark:hover:text-[#c9d1d9]"
+              }`}
+            >
+              Register
+            </button>
+          </div>
+
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2 transition-colors duration-300">
+              {currentView === "login" ? "Welcome back" : "Create your teacher account"}
+            </h1>
+            <p className="text-zinc-500 dark:text-[#8b949e] text-xs leading-relaxed max-w-[90%] transition-colors duration-300">
+              {currentView === "login"
+                ? "Sign in to access your lesson repos, exam banks, and shared workspaces."
+                : "Set up your workspace to start sharing lesson plans, exam banks, and classroom resources."}
+            </p>
+          </div>
+
+          {/* Conditional Form Rendering */}
+          {currentView === "login" ? (
+            <LoginForm />
+          ) : (
+            <RegisterForm onSuccess={() => handleToggle("login")} />
+          )}
+
+          <div className="mt-8 text-center">
+            <p className="text-sm text-zinc-500 dark:text-[#8b949e] transition-colors duration-300">
+              {currentView === "login" ? (
+                <>
+                  New to TeachShare?{" "}
+                  <button onClick={() => handleToggle("register")} className="text-blue-600 dark:text-[#58a6ff] hover:underline font-semibold ml-1">
+                    Create account
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <button onClick={() => handleToggle("login")} className="text-blue-600 dark:text-[#58a6ff] hover:underline font-semibold ml-1">
+                    Log in
+                  </button>
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-50 dark:bg-[#0d1117]" />}>
+      <AuthContent />
+    </Suspense>
+  );
+}
