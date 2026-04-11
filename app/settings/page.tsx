@@ -20,7 +20,7 @@ const SettingsPage = () => {
         method: 'POST',
         credentials: 'include'
       });
-      router.push('/login');
+      router.push('/auth?view=login');
     } catch (error) {
       console.error("Logout failed", error);
     }

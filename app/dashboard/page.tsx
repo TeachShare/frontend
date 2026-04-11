@@ -8,11 +8,16 @@ import { StatCard } from '@/components/sections/dashboard/StatCard';
 import { RecentResources } from '@/components/sections/dashboard/RecentResources';
 import { TeachingFocus } from '@/components/sections/dashboard/TeachingFocus';
 import { ActivitySnapshot } from '@/components/sections/dashboard/ActivitySnapshot';
+import { useUser } from '@/hooks/useUser';
+import { Loader2 } from 'lucide-react';
 
 const Page = () => {
+  const { data: user, isLoading }: any = useUser();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
+  
+  // Destructure isLoading
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1024;
@@ -25,6 +30,18 @@ const Page = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // 1. GLOBAL LOADING STATE (Optional)
+  // If you want the whole dashboard to wait for the user object
+  if (isLoading) {
+    return (
+      <Layout>
+        <main className="flex-1 flex items-center justify-center bg-zinc-50 dark:bg-[#090a0c]">
+          <Loader2 className="animate-spin text-zinc-400" size={32} />
+        </main>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <main className="flex-1 flex flex-col min-w-0 bg-zinc-50 dark:bg-[#090a0c] transition-colors duration-300">
@@ -36,7 +53,8 @@ const Page = () => {
             
             {/* Left Column */}
             <div className="col-span-12 lg:col-span-8 space-y-6">
-              <GreetingCard />
+              {/* Now user.last_name is guaranteed to exist */}
+              <GreetingCard lastName={user?.teacher_info.last_name}/> 
               
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <StatCard title="Resources shared" value="48" subtext="All-time uploads" trend="+6" />

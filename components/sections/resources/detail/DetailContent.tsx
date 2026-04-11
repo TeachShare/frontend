@@ -66,33 +66,24 @@ export const DetailContent = ({ resource }: Props) => {
           ))}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div>
-            <h3 className="text-zinc-900 dark:text-white font-bold text-sm mb-2 uppercase tracking-wide transition-colors duration-300">
+            <h3 className="text-zinc-900 dark:text-white font-bold text-sm mb-3 uppercase tracking-wide transition-colors duration-300">
               Overview
             </h3>
-            <p className="text-zinc-600 dark:text-zinc-400 text-[13px] leading-relaxed transition-colors duration-300">
-              This pack introduces one-variable linear equations using
-              real-world scenarios and multiple representations (tables, graphs,
-              and equations). Students move from concrete balance models to
-              abstract symbolic manipulation.
-            </p>
+            
+            {/* --- UPDATED: Dynamic Rich Text Rendering --- */}
+            <div 
+              className="text-zinc-600 dark:text-zinc-400 text-[13px] leading-relaxed transition-colors duration-300 
+                         [&>p]:mb-3 last:[&>p]:mb-0 
+                         [&>strong]:text-zinc-900 dark:[&>strong]:text-white [&>strong]:font-bold 
+                         [&>em]:italic 
+                         [&>ul]:list-disc [&>ul]:list-inside [&>ul]:mb-3 [&>ul>li]:mb-1
+                         [&>ol]:list-decimal [&>ol]:list-inside [&>ol]:mb-3 [&>ol>li]:mb-1"
+              dangerouslySetInnerHTML={{ __html: resource.description || "<p>No description provided.</p>" }}
+            />
           </div>
-          <div>
-            <h3 className="text-zinc-900 dark:text-white font-bold text-sm mb-2 uppercase tracking-wide transition-colors duration-300">
-              Learning objectives
-            </h3>
-            <ul className="list-disc list-inside text-zinc-600 dark:text-zinc-400 text-[13px] space-y-1 transition-colors duration-300">
-              <li>
-                Identify and write linear equations from verbal descriptions.
-              </li>
-              <li>
-                Solve one-step and multi-step equations using inverse
-                operations.
-              </li>
-              <li>Check solutions and interpret them in context.</li>
-            </ul>
-          </div>
+
         </div>
       </div>
     </div>

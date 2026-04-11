@@ -34,4 +34,5 @@ export interface RepositoryData {
 export interface RemixItemType {
   title: string;
   subject: string;
+  collection_id: string;
 }

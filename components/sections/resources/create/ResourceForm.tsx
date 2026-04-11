@@ -1,15 +1,29 @@
+"use client";
 import React from "react";
 import { ChevronDown, X } from "lucide-react";
 import { FormField } from "@/components/ui/FormField";
-import { ResourceFormData } from "@/types/resources";
+import { ResourceFormData } from "@/types/resources"; // *See note below about updating this!*
+
+// 1. Define the shape of the metadata coming from the backend
+interface MetadataOption {
+  id: number;
+  name: string;
+}
+
+interface Metadata {
+  subjects: MetadataOption[];
+  grade_levels: MetadataOption[];
+  content_types: MetadataOption[];
+}
 
 interface Props {
-  formData: ResourceFormData;
+  formData: any; // Temporarily any, or update ResourceFormData in your types file
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => void;
   addTag: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   removeTag: (tag: string) => void;
+  metadata: Metadata; // 2. Add metadata to your props
 }
 
 export const ResourceForm = ({
@@ -17,6 +31,7 @@ export const ResourceForm = ({
   handleChange,
   addTag,
   removeTag,
+  metadata,
 }: Props) => {
   return (
     <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-6 transition-colors duration-300">
@@ -43,15 +58,19 @@ export const ResourceForm = ({
       <div className="grid grid-cols-2 gap-6">
         <FormField label="Subject" required>
           <div className="relative">
+            {/* 3. Update name and value to use subject_id */}
             <select
-              name="subject"
-              value={formData.subject}
+              name="subject_id"
+              value={formData.subject_id}
               onChange={handleChange}
               className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-zinc-900 dark:text-zinc-300 appearance-none focus:outline-none transition-colors duration-300"
             >
-              <option>Science</option>
-              <option>Mathematics</option>
-              <option>Computer Science</option>
+              <option value="" disabled>Select a subject...</option>
+              {metadata?.subjects?.map((subject) => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.name}
+                </option>
+              ))}
             </select>
             <ChevronDown
               size={14}
@@ -59,17 +78,22 @@ export const ResourceForm = ({
             />
           </div>
         </FormField>
+        
         <FormField label="Grade level" required>
           <div className="relative">
+            {/* 4. Update name and value to use grade_level_id */}
             <select
-              name="gradeLevel"
-              value={formData.gradeLevel}
+              name="grade_level_id"
+              value={formData.grade_level_id}
               onChange={handleChange}
               className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-zinc-900 dark:text-zinc-300 appearance-none focus:outline-none transition-colors duration-300"
             >
-              <option>Grade 7-8</option>
-              <option>Grade 9-10</option>
-              <option>University</option>
+              <option value="" disabled>Select a grade level...</option>
+              {metadata?.grade_levels?.map((grade) => (
+                <option key={grade.id} value={grade.id}>
+                  {grade.name}
+                </option>
+              ))}
             </select>
             <ChevronDown
               size={14}
@@ -82,15 +106,19 @@ export const ResourceForm = ({
       <div className="grid grid-cols-2 gap-6">
         <FormField label="Resource type" required>
           <div className="relative">
+            {/* 5. Update name and value to use content_type_id */}
             <select
-              name="resourceType"
-              value={formData.resourceType}
+              name="content_type_id"
+              value={formData.content_type_id}
               onChange={handleChange}
               className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-zinc-900 dark:text-zinc-300 appearance-none focus:outline-none transition-colors duration-300"
             >
-              <option>Lesson plan & slides</option>
-              <option>Activity</option>
-              <option>Assessment</option>
+              <option value="" disabled>Select a resource type...</option>
+              {metadata?.content_types?.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
             </select>
             <ChevronDown
               size={14}
@@ -98,6 +126,7 @@ export const ResourceForm = ({
             />
           </div>
         </FormField>
+        
         <FormField label="Estimated duration">
           <input
             name="duration"
@@ -112,7 +141,7 @@ export const ResourceForm = ({
 
       <FormField label="Tags & topics">
         <div className="flex flex-wrap gap-2 p-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg transition-colors duration-300">
-          {formData.tags.map((t) => (
+          {formData.tags.map((t: string) => (
             <span
               key={t}
               className="px-2 py-0.5 bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 text-[10px] rounded flex items-center gap-1 transition-colors duration-300"

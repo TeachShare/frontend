@@ -1,15 +1,17 @@
 "use client";
 import React, { useState, useRef } from "react";
-import { FileUp, Files, X } from "lucide-react";
+import { FileUp, Files, X, CloudCheck } from "lucide-react";
 
 interface Props {
   attachedFiles: File[];
+  existingFiles?: any[]; // ADDED
   onAddFiles: (files: File[]) => void;
   onRemoveFile: (index: number) => void;
 }
 
 export const FileUploader = ({
   attachedFiles,
+  existingFiles = [], // DEFAULT TO EMPTY
   onAddFiles,
   onRemoveFile,
 }: Props) => {
@@ -41,10 +43,10 @@ export const FileUploader = ({
     <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-6 transition-colors duration-300">
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-bold text-zinc-900 dark:text-white transition-colors duration-300">
-          Attach files
+          Resource files
         </h3>
         <span className="text-[9px] text-zinc-500 dark:text-zinc-600 font-bold uppercase tracking-widest transition-colors duration-300">
-          Required
+          {attachedFiles.length + existingFiles.length} Total
         </span>
       </div>
 
@@ -64,51 +66,48 @@ export const FileUploader = ({
         onClick={() => fileInputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-10 text-center space-y-4 cursor-pointer transition-all duration-300 ${isDragging ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-transparent hover:border-emerald-500/30 dark:hover:border-emerald-500/30"}`}
       >
-        <FileUp
-          size={24}
-          className={`mx-auto transition-colors duration-300 ${isDragging ? "text-emerald-500" : "text-zinc-400 dark:text-zinc-700"}`}
-        />
+        <FileUp size={24} className={`mx-auto transition-colors duration-300 ${isDragging ? "text-emerald-500" : "text-zinc-400 dark:text-zinc-700"}`} />
         <div>
-          <p className="text-xs text-zinc-900 dark:text-white transition-colors duration-300">
-            Drop files here or click to browse
-          </p>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-600 mt-1 transition-colors duration-300">
-            PPTX, DOC, PDF, PNG • Max 250 MB
-          </p>
+          <p className="text-xs text-zinc-900 dark:text-white">Drop files here or click to browse</p>
+          <p className="text-[10px] text-zinc-500 mt-1">Add new files to this version</p>
         </div>
-        <button
-          type="button"
-          className="bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-4 py-1.5 rounded text-[11px] font-bold border border-zinc-200 dark:border-zinc-700 transition-colors duration-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 pointer-events-none"
-        >
-          Choose files
-        </button>
       </div>
 
-      {attachedFiles.length > 0 && (
-        <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-          {attachedFiles.map((file, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-lg group transition-colors duration-300"
-            >
+      {/* RENDER FILES CONTAINER */}
+      {(attachedFiles.length > 0 || existingFiles.length > 0) && (
+        <div className="space-y-2">
+          
+          {/* 1. Render Existing Files (Stored in Cloud) */}
+          {existingFiles.map((file, idx) => (
+            <div key={`exist-${idx}`} className="flex items-center justify-between p-3 bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-zinc-800/40 rounded-lg">
               <div className="flex items-center gap-3 overflow-hidden">
-                <Files
-                  size={16}
-                  className="text-zinc-400 dark:text-zinc-500 shrink-0"
-                />
-                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 truncate">
+                <CloudCheck size={16} className="text-emerald-500 shrink-0" />
+                <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 truncate">
                   {file.name}
                 </span>
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-600 shrink-0">
+              </div>
+              <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter">Current Version</span>
+            </div>
+          ))}
+
+          {/* 2. Render Newly Attached Files */}
+          {attachedFiles.map((file, idx) => (
+            <div
+              key={`new-${idx}`}
+              className="flex items-center justify-between p-3 bg-emerald-50/30 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/20 rounded-lg group"
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <Files size={16} className="text-emerald-500 shrink-0" />
+                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-200 truncate">
+                  {file.name}
+                </span>
+                <span className="text-[10px] text-emerald-600/60 dark:text-emerald-400/60 shrink-0">
                   {(file.size / (1024 * 1024)).toFixed(2)} MB
                 </span>
               </div>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemoveFile(idx);
-                }}
-                className="p-1 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                onClick={(e) => { e.stopPropagation(); onRemoveFile(idx); }}
+                className="p-1 text-zinc-400 hover:text-rose-500 transition-all duration-200"
               >
                 <X size={14} />
               </button>

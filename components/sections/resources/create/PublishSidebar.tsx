@@ -1,11 +1,13 @@
+"use client"
 import React from "react";
 import { useRouter } from "next/navigation";
 
 interface Props {
   onPublish: () => void;
+  onSaveDraft: () => void;
 }
 
-export const PublishSidebar = ({ onPublish }: Props) => {
+export const PublishSidebar = ({ onPublish, onSaveDraft }: Props) => {
   const router = useRouter();
 
   return (
@@ -67,7 +69,9 @@ export const PublishSidebar = ({ onPublish }: Props) => {
         >
           Publish to repository
         </button>
-        <button className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-transparent text-zinc-600 dark:text-zinc-400 py-3 rounded-xl font-bold text-xs hover:bg-zinc-50 dark:hover:text-white transition-colors duration-300">
+        <button 
+        onClick={onSaveDraft}
+        className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-transparent text-zinc-600 dark:text-zinc-400 py-3 rounded-xl font-bold text-xs hover:bg-zinc-50 dark:hover:text-white transition-colors duration-300">
           Save draft
         </button>
         <button

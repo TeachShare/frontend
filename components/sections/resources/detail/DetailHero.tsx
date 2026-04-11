@@ -14,9 +14,6 @@ export const DetailHero = ({ resource }: Props) => {
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight transition-colors duration-300">
             {resource.title}
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm max-w-3xl leading-relaxed transition-colors duration-300">
-            {resource.description}
-          </p>
           <div className="flex gap-2">
             {[
               `Subject: ${resource.subject}`,

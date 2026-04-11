@@ -3,13 +3,14 @@ import { Plus, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-export  const GreetingCard = () => {
+export  const GreetingCard = ({lastName}: {lastName: string}) => {
   const router = useRouter();
+
 
   return (
     <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 lg:p-8 transition-colors duration-300">
       <h2 className="text-xl font-bold text-zinc-900 dark:text-white transition-colors duration-300">
-        Good afternoon, Xasler!
+        Good afternoon, {lastName}!
       </h2>
       <p className="text-zinc-500 dark:text-zinc-400 text-[13px] mt-1.5">
         Here&apos;s how your algebra resources are supporting learners across
