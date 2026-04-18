@@ -70,14 +70,14 @@ const ResourceDetailView = () => {
 
   return (
     <Layout>
-      <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] overflow-y-auto transition-colors duration-300">
+      <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] min-h-screen overflow-y-auto transition-colors duration-300">
         <div className="max-w-7xl mx-auto p-6 space-y-6">
           <DetailHeader resource={resource} />
 
           {/* Pass the live fetched data into your components! */}
           <DetailHero resource={resource} />
 
-          <div className="grid grid-cols-12 gap-8">
+          <div className="grid grid-cols-12 gap-8 min-h-screen">
             <DetailContent resource={resource} />
             <DetailSidebar resource={resource} />
           </div>
