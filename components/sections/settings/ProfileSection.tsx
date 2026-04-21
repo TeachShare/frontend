@@ -7,7 +7,7 @@ import Layout from "@/components/layout/Layout";
 export const ProfileSection = () => {
   const { data: user, isLoading, isError }: any = useUser();
   
-  const seed = `${user?.teacher_info?.id ?? "0"}-${user?.teacher_info?.last_name ?? "Xasler"}`;
+  const seed = `${user?.id ?? "0"}-${user?.last_name ?? "Xasler"}`;
 
 
   if(isLoading){
@@ -79,7 +79,7 @@ export const ProfileSection = () => {
             </label>
             <input
               type="text"
-              defaultValue={`${user?.teacher_info.first_name} ${user?.teacher_info.last_name}`}
+              defaultValue={`${user?.first_name} ${user?.last_name}`}
               className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-[13px] text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors duration-300"
             />
           </div>

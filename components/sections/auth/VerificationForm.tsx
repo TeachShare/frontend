@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Mail, RefreshCw } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { api } from "@/lib/axios";
+import { useRouter } from "next/navigation";
 
 interface Props {
   userEmail: string;
@@ -8,6 +11,7 @@ interface Props {
 }
 
 export const VerificationForm = ({ userEmail, onSuccess }: Props) => {
+  const router = useRouter();
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
@@ -65,24 +69,69 @@ export const VerificationForm = ({ userEmail, onSuccess }: Props) => {
     handleChange(0, pastedData);
   };
 
-  const verifyCode = (e?: React.FormEvent<HTMLFormElement>) => {
+  const verifyCode = async (e?: React.FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     const fullCode = code.join("");
     if (fullCode.length !== 6) return;
 
     setIsVerifying(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const cookies = document.cookie.split("; ");
+      const teacherId = cookies
+        .find((row) => row.startsWith("teacher_id="))
+        ?.split("=")[1];
+
+      if (!teacherId) {
+        toast.error("Session missing. Please log in again.");
+        return;
+      }
+
+      const response = await api.post("/auth/verify", {
+        code: fullCode,
+        teacher_id: teacherId,
+      });
+
+      if (response.status === 200) {
+        toast.success("Account verified successfully!");
+        document.cookie = "is_verified=true; path=/";
+
+        router.push("/dashboard")
+        onSuccess();
+      }
+    } catch (error: any) {
+      console.error("Verification error: ", error);
+      const errorMessage =
+        error.response?.data?.error || "Invalid code. Please try again.";
+      toast.error(errorMessage);
+
+      setCode(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } finally {
       setIsVerifying(false);
-      onSuccess();
-    }, 1500);
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (resendCooldown > 0) return;
     setResendCooldown(30);
-    console.log("Resending code to", userEmail);
+    const cookies = document.cookie.split("; ");
+    const teacherId = cookies
+        .find((row) => row.startsWith("teacher_id="))
+        ?.split("=")[1];
+
+
+    try {
+      const response = await api.post("/auth/resend-code", {
+        teacher_id: teacherId,
+      });
+
+      if (response.status === 200) {
+        toast.success("A new code has been sent!");
+      }
+    } catch (error) {
+      toast.error("Failed to resend code.");
+    }
   };
 
   const isCodeComplete = code.every((digit) => digit !== "");

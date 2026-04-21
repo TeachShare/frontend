@@ -3,6 +3,10 @@ import { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get("access_token_cookie");
+
+  const isVerified = request.cookies.get("is_verified")?.value === "true";
+  const verifHash = request.cookies.get("verif_hash")?.value;
+
   const { pathname } = request.nextUrl;
 
   if (token && (pathname === "/auth" || pathname === "/auth")) {
@@ -27,6 +31,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth?view=login", request.url));
   }
 
+  if (token && !isVerified && isProtectedRoute) {
+    if (!pathname.startsWith("/verification")) {
+      const target = verifHash
+        ? `/verification/${verifHash}`
+        : "/auth?view=login";
+      return NextResponse.redirect(new URL(target, request.url));
+    }
+  }
   return NextResponse.next();
 }
 

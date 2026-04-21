@@ -54,7 +54,7 @@ const Page = () => {
             {/* Left Column */}
             <div className="col-span-12 lg:col-span-8 space-y-6">
               {/* Now user.last_name is guaranteed to exist */}
-              <GreetingCard lastName={user?.teacher_info.last_name}/> 
+              <GreetingCard lastName={user?.last_name}/> 
               
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <StatCard title="Resources shared" value="48" subtext="All-time uploads" trend="+6" />

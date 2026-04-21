@@ -44,7 +44,13 @@ export const LoginForm = () => {
         loginPromise,
         {
           loading: "Signing you in...",
-          success: () => {
+          success: (data) => {
+          
+            if(!data.is_verified && data.verification_hash){
+                router.push(`/verification/${data.verification_hash}`);
+                return "Please verify your account to continue."
+            }
+
             router.push("/dashboard");
             return "Welcome back!";
           },
