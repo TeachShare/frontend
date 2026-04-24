@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Eye, Download, ThumbsUp, RefreshCw, Star, Trash2, Loader2, X } from "lucide-react";
+import { Eye, Download, ThumbsUp, RefreshCw, Star, Trash2, Loader2, X, FileText } from "lucide-react";
 import { ResourceDetail } from "@/types/resources";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -10,34 +10,32 @@ import "@cyntler/react-doc-viewer/dist/index.css";
 
 interface Props {
   resource: ResourceDetail;
+  // Added props from our previous integration plan
+  likesCount?: number;
+  isLiked?: boolean;
+  onLike?: () => void;
 }
 
-export const DetailSidebar = ({ resource }: Props) => {
+export const DetailSidebar = ({ resource, likesCount, isLiked, onLike }: Props) => {
   const [isZipping, setIsZipping] = useState(false);
   const [viewFile, setViewFile] = useState<{url: string, name: string} | null>(null);
 
   const handleDownloadAll = async () => {
     if (!resource.files || resource.files.length === 0) return;
-    
     try {
       setIsZipping(true);
       const zip = new JSZip();
-
       const fetchPromises = resource.files.map(async (file) => {
         const response = await fetch(file.url);
         const blob = await response.blob();
         zip.file(file.name, blob);
       });
-
       await Promise.all(fetchPromises);
-
       const content = await zip.generateAsync({ type: "blob" });
       const cleanName = resource.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       saveAs(content, `${cleanName}-files.zip`);
-      
     } catch (error) {
       console.error("Error creating zip file:", error);
-      alert("Failed to zip files. Please try downloading them individually.");
     } finally {
       setIsZipping(false);
     }
@@ -49,178 +47,141 @@ export const DetailSidebar = ({ resource }: Props) => {
       const blob = await response.blob();
       saveAs(blob, filename);
     } catch (error) {
-      console.error("Download failed:", error);
       window.open(url, '_blank');
     }
   };
 
- 
   return (
     <>
       <div className="col-span-12 lg:col-span-4 space-y-6">
-        {/* Files List */}
-        <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 transition-colors duration-300">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-widest transition-colors duration-300">
-              Files in this resource
+        {/* Files Card */}
+        <div className="bg-white dark:bg-[#111317] border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm overflow-hidden">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-[10px] font-bold text-zinc-500 dark:text-[#8E9196] uppercase tracking-[0.2em]">
+              Resource Content
             </h2>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded transition-colors duration-300">
-              Ready for students
+            <span className="bg-emerald-500/10 text-emerald-600 dark:text-[#00D084] px-2 py-1 rounded text-[9px] font-bold uppercase tracking-tighter border border-emerald-500/20">
+              Verified
             </span>
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-2.5">
             {resource.files.map((file, i) => (
               <div
                 key={i}
-                className="group p-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-300"
+                className="group p-3 bg-zinc-50 dark:bg-[#08090A] border border-zinc-200 dark:border-[#1F2226] rounded-lg hover:border-zinc-300 dark:hover:border-[#2D3138] transition-all duration-200"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-zinc-900 dark:text-zinc-300 font-medium transition-colors duration-300 truncate max-w-[150px]" title={file.name}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="p-2 bg-white dark:bg-[#111317] rounded border border-zinc-200 dark:border-[#1F2226]">
+                      <FileText size={14} className="text-zinc-400" />
+                    </div>
+                    <span className="text-xs text-zinc-700 dark:text-[#E1E3E6] font-semibold truncate" title={file.name}>
                       {file.name}
                     </span>
                   </div>  
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5 ml-2">
                     <button 
                       onClick={() => setViewFile({ url: file.url, name: file.name })}
-                      className="p-1 text-zinc-400 hover:text-blue-600 dark:text-zinc-500 dark:hover:text-blue-400 transition-colors duration-300"
-                      title="View file"
+                      className="p-1.5 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/5 rounded-md transition-all"
                     >
                       <Eye size={14} />
                     </button>
                     <button 
                       onClick={() => handleSingleDownload(file.url, file.name)}
-                      className="p-1 text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors duration-300"
-                      title="Download file"
+                      className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-[#1F2226] rounded-md transition-all"
                     >
                       <Download size={14} />
                     </button>
                   </div>
                 </div>
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-600 uppercase font-bold tracking-wider transition-colors duration-300">
-                  {file.type || 'Document'} · {file.size || 'Unknown size'}
-                </p>
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-6 text-[10px] text-zinc-500 dark:text-zinc-500 font-bold uppercase tracking-widest transition-colors duration-300">
-            <span className="flex items-center gap-1">
-              <ThumbsUp size={12} /> {resource.likes} likes
-            </span>
-            <span className="flex items-center gap-1">
-              <RefreshCw size={12} /> {resource.remixes} remixes
-            </span>
-            <span className="flex items-center gap-1">
-              <Download size={12} /> {resource.downloads} dls
-            </span>
-          </div>
-        </div>
 
-        {/* Reviews */}
-        <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-6 transition-colors duration-300">
-          <div className="flex justify-between items-center">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-widest transition-colors duration-300">
-              Reviews & feedback
-            </h2>
-            <button className="text-[10px] text-zinc-600 dark:text-zinc-500 font-bold uppercase flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1 rounded transition-colors duration-300">
-              Leave a review <Star size={12} />
+          {/* Interaction Bar - Revamped */}
+          <div className="grid grid-cols-3 gap-2 mt-8">
+            <button 
+              onClick={onLike}
+              className={`flex flex-col items-center gap-1.5 py-3 rounded-lg border transition-all ${
+                isLiked 
+                ? 'bg-emerald-500/5 border-emerald-500/30 text-emerald-500' 
+                : 'bg-zinc-50 dark:bg-[#08090A] border-zinc-200 dark:border-[#1F2226] text-zinc-500 hover:border-zinc-300 dark:hover:border-[#2D3138]'
+              }`}
+            >
+              <ThumbsUp size={14} className={isLiked ? "fill-current" : ""} />
+              <span className="text-[10px] font-bold uppercase">{likesCount ?? resource.likes}</span>
             </button>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 transition-colors duration-300" />
-                  <span className="text-xs text-zinc-900 dark:text-zinc-300 font-bold transition-colors duration-300">
-                    Priya Singh
-                  </span>
-                </div>
-                <div className="flex text-yellow-500">
-                  <Star size={10} fill="currentColor" />
-                  <Star size={10} fill="currentColor" />
-                  <Star size={10} fill="currentColor" />
-                  <Star size={10} fill="currentColor" />
-                  <Star size={10} />
-                </div>
-              </div>
-              <p className="text-[11px] text-zinc-600 dark:text-zinc-500 italic transition-colors duration-300">
-                &quot;Clear progression from concrete to abstract. My students
-                especially liked the real-world word problems.&quot;
-              </p>
+            <div className="flex flex-col items-center gap-1.5 py-3 rounded-lg bg-zinc-50 dark:bg-[#08090A] border border-zinc-200 dark:border-[#1F2226] text-zinc-500">
+              <RefreshCw size={14} />
+              <span className="text-[10px] font-bold uppercase">{resource.remixes || 0}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5 py-3 rounded-lg bg-zinc-50 dark:bg-[#08090A] border border-zinc-200 dark:border-[#1F2226] text-zinc-500">
+              <Download size={14} />
+              <span className="text-[10px] font-bold uppercase">{resource.downloads || 0}</span>
             </div>
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex">
+          {/* Main Action Button */}
           <button 
             onClick={handleDownloadAll}
-            disabled={isZipping || !resource.files || resource.files.length === 0}
-            className="w-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-400 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isZipping || !resource.files?.length}
+            className="w-full mt-4 bg-zinc-900 dark:bg-[#1A1C20] border border-zinc-800 dark:border-[#2D3138] text-white py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-black dark:hover:bg-[#25282E] transition-all duration-300 shadow-lg shadow-black/20 disabled:opacity-50 group"
           >
             {isZipping ? (
-              <>
-                <Loader2 size={14} className="animate-spin" /> Zipping...
-              </>
+              <Loader2 size={16} className="animate-spin text-emerald-500" />
             ) : (
               <>
-                <Download size={14} /> Download all
+                <Download size={16} className="group-hover:-translate-y-0.5 transition-transform" />
+                <span className="uppercase tracking-widest">Download all assets</span>
               </>
             )}
           </button>
         </div>
-        <button className="w-full text-zinc-500 dark:text-zinc-600 hover:text-rose-600 dark:hover:text-rose-500 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2">
-          <Trash2 size={12} /> Delete resource
+
+        {/* Danger Zone */}
+        <button className="w-full group py-2 text-zinc-400 dark:text-[#5C5F66] hover:text-rose-500 transition-colors flex items-center justify-center gap-2">
+          <Trash2 size={12} className="opacity-50 group-hover:opacity-100" />
+          <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Delete resource</span>
         </button>
       </div>
 
-    {/* --- UPDATED: React Doc Viewer Modal --- */}
+      {/* Doc Viewer Modal */}
       {viewFile && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-zinc-950/95 backdrop-blur-sm animate-in fade-in duration-300">
-          
-          {/* Header */}
-          <div className="flex-none h-14 flex justify-between items-center px-6 bg-zinc-950 border-b border-zinc-800 shadow-xl z-10">
-            <h3 className="text-white font-bold text-sm truncate max-w-xl italic opacity-80">
-              {viewFile.name}
-            </h3>
+        <div className="fixed inset-0 z-[100] flex flex-col bg-[#08090A]/95 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="flex-none h-16 flex justify-between items-center px-8 border-b border-[#1F2226]">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center">
+                <FileText size={16} className="text-black" />
+              </div>
+              <h3 className="text-white font-bold text-sm tracking-tight">{viewFile.name}</h3>
+            </div>
             <button 
               onClick={() => setViewFile(null)}
-              className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+              className="p-2 text-zinc-400 hover:text-white bg-[#1F2226] rounded-full transition-all"
             >
               <X size={20} />
             </button>
           </div>
           
-          {/* Main Viewer Container */}
-          <div className="flex-1 relative w-full max-w-7xl mx-auto my-2 md:my-4 overflow-hidden">
-            
-            {/* THE TRICK: We use !h-full on every single div and iframe inside DocViewer 
-              to bypass the library's internal height calculations.
-            */}
-            <div className="absolute inset-0 [&_*]:!h-full [&_iframe]:!h-full [&_iframe]:!border-none">
-              <DocViewer 
-                documents={[{ uri: viewFile.url, fileName: viewFile.name }]} 
-                pluginRenderers={DocViewerRenderers}
-                style={{ width: "100%", height: "100%" }}
-                config={{
-                  header: {
-                    disableHeader: true,
-                  },
-                }}
-                theme={{
-                  primary: "#2563eb", 
-                  secondary: "#090a0c", 
-                  tertiary: "#18181b", 
-                  textPrimary: "#ffffff", 
-                  textSecondary: "#a1a1aa", 
-                  disableThemeScrollbar: false,
-                }}
-              />
+          <div className="flex-1 p-4 md:p-8">
+            <div className="h-full w-full max-w-6xl mx-auto rounded-xl overflow-hidden border border-[#1F2226] shadow-2xl relative">
+              <div className="absolute inset-0 [&_*]:!h-full [&_iframe]:!h-full [&_iframe]:!border-none">
+                <DocViewer 
+                  documents={[{ uri: viewFile.url, fileName: viewFile.name }]} 
+                  pluginRenderers={DocViewerRenderers}
+                  config={{ header: { disableHeader: true } }}
+                  theme={{
+                    primary: "#00D084",
+                    secondary: "#08090A",
+                    tertiary: "#111317",
+                    textPrimary: "#ffffff",
+                    textSecondary: "#8E9196",
+                  }}
+                />
+              </div>
             </div>
-            
           </div>
-
         </div>
       )}
     </>

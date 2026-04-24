@@ -19,14 +19,12 @@ const VersionHistoryPage = () => {
   const [versions, setVersions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Fetch real version history from your spawned collections
-  useEffect(() => {
-    const fetchHistory = async () => {
+  const [isRestoring, setIsRestoring] = useState(false);
+   const fetchHistory = async (showLoader = true) => {
       if (!collectionId) return;
       
       try {
-        setIsLoading(true);
+      if (showLoader) setIsLoading(true);
         const response = await api.get(`/resource_collection/${collectionId}/history`);
         
         if (response.data.success) {
@@ -43,8 +41,29 @@ const VersionHistoryPage = () => {
       }
     };
 
-    fetchHistory();
+  // Fetch real version history from your spawned collections
+  useEffect(() => {
+  
+    fetchHistory(true);
   }, [collectionId]);
+
+  const handleRestore = async (versionId: number) => {
+    if (!window.confirm("Are you sure you want to restore this version?")) return;
+
+    try {
+      setIsRestoring(true);
+      const response = await api.post(`/resource_collection/${collectionId}/restore/${versionId}`);
+      
+      if (response.data.success) {
+        await fetchHistory(false); 
+        alert("Restored successfully!");
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Error restoring version");
+    } finally {
+      setIsRestoring(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -111,7 +130,9 @@ const VersionHistoryPage = () => {
                     key={version.version_id}
                     version={version}
                     isLast={i === versions.length - 1}
-                    isLatest={i === 0}
+                    isLatest={version.is_latest}
+                    onRestore={() => handleRestore(version.version_id)}
+                    disabled={isRestoring}
                   />
                 ))
               ) : (

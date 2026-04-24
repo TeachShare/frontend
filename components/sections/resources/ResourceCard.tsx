@@ -12,9 +12,10 @@ interface ExtendedResourceCardProps extends ResourceCardProps {
   collection_id?: number;
   grade?: string;
   tags?: string[];
-  updated_at?: string; 
+  updated_at?: string;
+  like_count?: number;    // Add the backend's likely naming
+  download_count?: number; 
 }
-
 export const ResourceCard = ({
   title,
   category, 
@@ -23,6 +24,7 @@ export const ResourceCard = ({
   tags = [], 
   downloads = 0, 
   likes = 0,
+  like_count,
   updated, 
   updated_at, 
   curriculum = "Local",
@@ -40,6 +42,9 @@ export const ResourceCard = ({
 
   const isDraft = is_published === false || status === "Draft";
   const displayStatus = isDraft ? "Draft" : "Published";
+
+  const activeLikes = likes || like_count || 0;
+  // const activeDownloads = downloads || download_count || 0;
   
   const displayUpdated = updated_at 
     ? formatDistanceToNow(new Date(updated_at), { addSuffix: true }) 
@@ -136,7 +141,7 @@ export const ResourceCard = ({
 
           <div className="grid grid-cols-3 gap-y-2 mb-4 border-t border-zinc-100 dark:border-zinc-800/50 pt-3">
             <div className="text-[10px] text-zinc-500 font-medium">Downloads: <span className="text-zinc-900 dark:text-zinc-300 font-bold">{downloads}</span></div>
-            <div className="text-[10px] text-zinc-500 font-medium text-center">Likes: <span className="text-zinc-900 dark:text-zinc-300 font-bold">{likes}</span></div>
+            <div className="text-[10px] text-zinc-500 font-medium text-center">Likes: <span className="text-zinc-900 dark:text-zinc-300 font-bold">{activeLikes}</span></div>
             <div className="text-[10px] text-zinc-500 font-medium text-right">Updated: <span className="text-zinc-900 dark:text-zinc-300 font-bold">{displayUpdated}</span></div>
           </div>
         </div>

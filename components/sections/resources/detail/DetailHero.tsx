@@ -7,6 +7,7 @@ interface Props {
 }
 
 export const DetailHero = ({ resource }: Props) => {
+  console.log(resource);
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
@@ -16,13 +17,13 @@ export const DetailHero = ({ resource }: Props) => {
           </h1>
           <div className="flex gap-2">
             {[
-              `Subject: ${resource.subject}`,
+              `Subject: ${resource.subject} 2sdasdasda`,
               resource.grade,
               `Unit: ${resource.unit}`,
               `Type: ${resource.type}`,
-            ].map((tag) => (
+            ].map((index, tag) => (
               <span
-                key={tag}
+                key={index}
                 className="px-2 py-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded text-[10px] text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-wider transition-colors duration-300"
               >
                 {tag}
@@ -32,8 +33,7 @@ export const DetailHero = ({ resource }: Props) => {
         </div>
         <div className="text-right space-y-2">
           <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 px-3 py-1 rounded text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase tracking-tighter inline-flex items-center gap-2 transition-colors duration-300">
-            <RefreshCw size={12} /> Remix of Algebra Fundamentals by Maria
-            Santos
+            <RefreshCw size={12} /> {resource.title}
           </div>
           <div className="flex items-center justify-end gap-1 text-yellow-500">
             <Star size={14} fill="currentColor" />{" "}

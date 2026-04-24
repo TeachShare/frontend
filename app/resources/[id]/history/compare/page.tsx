@@ -84,9 +84,9 @@ const CompareVersionsPage = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {allVersions.map((v) => (
+            {allVersions.map((v, idx) => (
               <button
-                key={v.collection_id}
+                key={`${v.collection_id}-${idx}`}
                 onClick={() => selectForComparison(v.collection_id)}
                 className={`w-full text-left p-4 rounded-xl border transition-all ${
                   compareWithId === String(v.collection_id) || (v.is_latest && !compareWithId)
@@ -187,7 +187,7 @@ const CompareColumn = ({ label, data, isLatest }: any) => {
           </div>
 
           <div className="flex flex-wrap gap-1.5 mt-4">
-            {data.tags?.map((tag: string) => (
+            {data.tags?.map((index: number, tag: string) => (
               <span key={tag} className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${
                 isLatest ? 'bg-blue-500/30 border-blue-400/30 text-white' : 'bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'
               }`}>
