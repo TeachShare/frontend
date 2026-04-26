@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ResourceCardProps } from "@/types/resources";
 import { api } from "@/lib/axios"; 
 import { Loader2, Trash2, AlertTriangle, X } from "lucide-react"; 
+import { parseISO } from "date-fns";
 import { toast } from "react-hot-toast"; // --- IMPORT TOAST ---
 
 interface ExtendedResourceCardProps extends ResourceCardProps {
@@ -47,7 +48,7 @@ export const ResourceCard = ({
   // const activeDownloads = downloads || download_count || 0;
   
   const displayUpdated = updated_at 
-    ? formatDistanceToNow(new Date(updated_at), { addSuffix: true }) 
+    ? formatDistanceToNow(parseISO(updated_at), { addSuffix: true }) 
     : updated;
 
   const handleViewResource = () => {

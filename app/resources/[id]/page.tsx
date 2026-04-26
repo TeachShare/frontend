@@ -171,7 +171,7 @@ const ResourceDetailView = () => {
                 isLiked={isLiked}
                 onLike={handleLikeToggle}
                 // TRIGGER: Opens the modal from the sidebar button
-                onRemix={() => setIsRemixModalOpen(true)} 
+                onRemix={() =>  (true)} 
               />
             </div>
           </div>
