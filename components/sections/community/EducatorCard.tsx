@@ -1,9 +1,13 @@
 "use client";
 import React from "react";
-import { Plus, Check } from "lucide-react";
+import { Plus, Check, Mail } from "lucide-react";
 import { Educator } from "@/types/community";
+import Link from "next/link";
+
+import { useToggleFollow } from "@/hooks/useTeacher";
 
 export const EducatorCard = ({
+  id,
   name,
   role,
   avatar,
@@ -15,40 +19,52 @@ export const EducatorCard = ({
   specialTags,
   following = false,
 }: Educator) => {
+  const toggleFollow = useToggleFollow();
+
   return (
     <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all flex flex-col justify-between group duration-300">
       <div>
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center space-x-3">
-            <img
-              src={avatar}
-              alt={name}
-              className="w-12 h-12 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 transition-colors duration-300"
-            />
+            <Link href={`/profile/${id}`}>
+                <img
+                src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`}
+                alt={name}
+                className="w-12 h-12 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 transition-colors duration-300 cursor-pointer"
+                />
+            </Link>
             <div>
-              <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
-                {name}
-              </h4>
+              <Link href={`/profile/${id}`}>
+                <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 cursor-pointer">
+                    {name}
+                </h4>
+              </Link>
               <p className="text-[11px] text-zinc-500 dark:text-zinc-500 leading-tight mt-0.5 transition-colors duration-300">
-                {role}
+                {role || "Educator"}
               </p>
             </div>
           </div>
           <button
-            className={`flex items-center space-x-2 px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-300 ${
+            onClick={() => toggleFollow.mutate(id)}
+            disabled={toggleFollow.isPending}
+            className={`flex items-center space-x-2 px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-300 group/btn ${
               following
-                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-500"
                 : "bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-600/20 border border-blue-200 dark:border-blue-500/20"
             }`}
           >
-            {following ? (
-              <>
-                <Check size={14} /> <span>Following</span>
-              </>
-            ) : (
-              <>
-                <Plus size={14} /> <span>Follow</span>
-              </>
+            {toggleFollow.isPending ? "..." : (
+                following ? (
+                    <>
+                        <Check size={14} className="group-hover/btn:hidden" /> 
+                        <span className="group-hover/btn:hidden">Following</span>
+                        <span className="hidden group-hover/btn:inline text-rose-500">Unfollow</span>
+                    </>
+                ) : (
+                    <>
+                        <Plus size={14} /> <span>Follow</span>
+                    </>
+                )
             )}
           </button>
         </div>
@@ -119,9 +135,18 @@ export const EducatorCard = ({
       </div>
 
       <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800/50 transition-colors duration-300">
-        <button className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors duration-300">
-          View profile
-        </button>
+        <div className="flex items-center gap-3">
+            <Link href={`/profile/${id}`}>
+                <button className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors duration-300">
+                    View profile
+                </button>
+            </Link>
+            <Link href={`/profile/${id}?message=true`}>
+                <button className="text-[11px] font-bold text-zinc-500 dark:text-zinc-500 hover:text-emerald-500 transition-colors duration-300 flex items-center gap-1">
+                    <Mail size={12} /> Message
+                </button>
+            </Link>
+        </div>
         <button className="text-[11px] font-bold text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors duration-300">
           Invite to collaborate
         </button>

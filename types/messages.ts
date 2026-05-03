@@ -1,21 +1,30 @@
 import { LucideIcon } from "lucide-react";
 
 export interface Conversation {
-  id: string;
+  id: number;
   name: string;
-  lastMessage: string;
-  type: string;
-  unread: boolean;
+  avatar?: string;
+  last_message: string;
+  timestamp?: string;
+  unread_count: number;
 }
 
-export interface ConversationItemProps extends Omit<Conversation, "id"> {
+export interface ConversationItemProps {
+  conversation: Conversation;
   active: boolean;
   onClick: () => void;
 }
 
+export interface Message {
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+    content: string;
+    is_read: boolean;
+    created_at: string;
+}
+
 export interface MessageBubbleProps {
-  text: string;
-  time: string;
+  message: Message;
   isMe: boolean;
-  status?: "Sent" | "Delivered" | "Seen";
 }

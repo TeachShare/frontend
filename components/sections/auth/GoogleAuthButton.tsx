@@ -2,10 +2,8 @@ import React from "react";
 
 export const GoogleAuthButton = () => {
   const handleGoogleLogin = () => {
-    // This points to your Flask blueprint route
-    window.location.href = "http://localhost:5000/api/v1/auth/login/google";
-  };
-
+  window.location.href = "http://localhost:5000/api/v1/auth/login/google";
+};
   return (
     <button
       onClick={handleGoogleLogin}

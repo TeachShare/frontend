@@ -12,6 +12,7 @@
   } from "lucide-react";
   import { useTheme } from "next-themes";
   import { useUser } from "@/hooks/useUser";
+  import Link from "next/link";
 
   interface HeaderProps {
     onMenuClick: () => void;
@@ -27,7 +28,7 @@
     const notifRef = useRef<HTMLDivElement>(null);
 
     // Use for profile
-    const seed = `${user?.teacher_info?.id ?? "0"}-${user?.teacher_info?.last_name ?? "Xasler"}`;
+    const seed = `${user?.id ?? "0"}-${user?.last_name ?? "User"}`;
     const [notifications, setNotifications] = useState([
       {
         id: 1,
@@ -242,20 +243,21 @@
           </div>
 
           <div className="flex items-center space-x-3 border-l border-zinc-200 dark:border-zinc-800 pl-4 h-8 transition-colors">
-            <div className="text-right hidden sm:block">
-              {/* Added optional chaining here so it doesn't crash if user is null */}
-              <p className="text-[13px] font-bold text-zinc-900 dark:text-white leading-none">
-                {user?.teacher_info?.last_name || "Teacher"}
-              </p>
-              <p className="text-[10px] text-zinc-500 font-medium mt-1">
-                Software Instructor
-              </p>
-            </div>
-            <img
-              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`}
-              className="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
-              alt="User"
-            />
+            <Link href={`/profile/${user?.id}`} className="flex items-center space-x-3">
+                <div className="text-right hidden sm:block">
+                <p className="text-[13px] font-bold text-zinc-900 dark:text-white leading-none hover:text-emerald-500 transition-colors">
+                    {user?.first_name} {user?.last_name}
+                </p>
+                <p className="text-[10px] text-zinc-500 font-medium mt-1">
+                    {user?.role || "Educator"}
+                </p>
+                </div>
+                <img
+                src={user?.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`}
+                className="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-emerald-500 transition-colors"
+                alt="User"
+                />
+            </Link>
           </div>
         </div>
       </header>

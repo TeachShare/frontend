@@ -9,7 +9,13 @@ export interface TeacherInfo {
 export interface User {
   id: number;
   email: string;
-  teacher_info?: TeacherInfo;
+  first_name: string;
+  last_name: string;
+  profile?: string;
+  role?: string;
+  institution?: string;
+  bio?: string;
+  is_verified: boolean;
 }
 
 // 2. We explicitly tell the function that it will return a Promise containing our User
