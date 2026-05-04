@@ -2,7 +2,7 @@ import React from 'react';
 import { Download, X } from 'lucide-react';
 import { GeneratedCardProps } from '@/types/generator';
 
-export const GeneratedCard: React.FC<GeneratedCardProps> = ({ title, subject, description, tags, type }) => (
+export const GeneratedCard: React.FC<GeneratedCardProps> = ({ id, title, subject, description, tags, type, pdf_url, onDelete }) => (
   <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group duration-300 flex flex-col">
     <div className="flex justify-between items-start mb-4">
       <div>
@@ -27,11 +27,26 @@ export const GeneratedCard: React.FC<GeneratedCardProps> = ({ title, subject, de
     </div>
 
     <div className="flex gap-2 mt-auto">
-      <button className="flex-1 flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-600/10 hover:bg-blue-100 dark:hover:bg-blue-600/20 text-blue-600 dark:text-blue-400 py-2 rounded-lg text-[12px] font-bold transition-all border border-blue-200 dark:border-blue-500/20">
-        <Download size={14} />
-        Download
-      </button>
-      <button className="flex items-center justify-center p-2 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg transition-all border border-red-200 dark:border-red-500/20">
+      {pdf_url ? (
+        <a 
+          href={pdf_url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex-1 flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-600/10 hover:bg-blue-100 dark:hover:bg-blue-600/20 text-blue-600 dark:text-blue-400 py-2 rounded-lg text-[12px] font-bold transition-all border border-blue-200 dark:border-blue-500/20"
+        >
+          <Download size={14} />
+          Download PDF
+        </a>
+      ) : (
+        <button disabled className="flex-1 flex items-center justify-center gap-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 py-2 rounded-lg text-[12px] font-bold cursor-not-allowed">
+          <Download size={14} />
+          Processing...
+        </button>
+      )}
+      <button 
+        onClick={() => onDelete?.(id)}
+        className="flex items-center justify-center p-2 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg transition-all border border-red-200 dark:border-red-500/20"
+      >
         <X size={16} />
       </button>
     </div>

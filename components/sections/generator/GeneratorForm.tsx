@@ -10,46 +10,41 @@ import {
 } from "lucide-react";
 import { ContentType, ViewMode } from "@/types/generator";
 import { ContentTypeCard } from "./ContentTypeCard";
+import { useGenerator } from "@/hooks/useGenerator";
 
 interface Props {
-  onSuccess: (view: ViewMode) => void;
+  onSuccess: () => void;
 }
 
 export const GeneratorForm = ({ onSuccess }: Props) => {
   const [selectedType, setSelectedType] = useState<ContentType>("classroom");
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const [error, setError] = useState<string | null>(null);
+  const { generate, isGenerating, error: apiError } = useGenerator();
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const [subject, setSubject] = useState<string>("Computer Science");
   const [grade, setGrade] = useState<string>("University");
   const [objectives, setObjectives] = useState<string>("");
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!objectives || !subject || !grade) {
-      setError(
+      setValidationError(
         "Subject, Grade Level, and Learning Goals/Objectives are required to generate content.",
       );
       return;
     }
-    setError(null);
-    setIsGenerating(true);
-    setProgress(0);
+    setValidationError(null);
+    
+    await generate({
+      type: selectedType,
+      subject,
+      grade,
+      objectives
+    });
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setIsGenerating(false);
-            onSuccess("results");
-          }, 500);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 50);
+    onSuccess();
   };
+
+  const error = validationError || apiError;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -167,14 +162,8 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
 
             {isGenerating && (
               <div className="space-y-3 animate-in fade-in">
-                <div className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-900 rounded-full overflow-hidden transition-colors duration-300">
-                  <div
-                    className="h-full bg-emerald-500 transition-all duration-300 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.4)]"
-                    style={{ width: `${progress}%` }}
-                  ></div>
-                </div>
                 <p className="text-center text-zinc-500 dark:text-zinc-500 text-[11px] font-medium italic transition-colors duration-300">
-                  Generating classroom materials based on your objectives...
+                  Generating classroom materials based on your objectives... This may take a few seconds.
                 </p>
               </div>
             )}

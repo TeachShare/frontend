@@ -59,12 +59,15 @@ export const useSocket = () => {
     };
   }, [user?.id, queryClient]);
 
-  const sendMessage = (receiverId: number, content: string) => {
+  const sendMessage = (receiverId: number, content: string, fileData?: { url: string, name: string, type: string }) => {
     if (socketRef.current && user?.id) {
       socketRef.current.emit("send_message", {
         sender_id: user.id,
         receiver_id: receiverId,
-        content: content
+        content: content,
+        file_url: fileData?.url,
+        file_name: fileData?.name,
+        file_type: fileData?.type
       });
     }
   };

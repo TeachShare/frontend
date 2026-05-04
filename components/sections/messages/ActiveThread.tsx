@@ -1,18 +1,22 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Files, Pin, Trash2, Smile, Paperclip, Plus, Send, Loader2 } from "lucide-react";
+import { Files, Pin, Trash2, Smile, Paperclip, Plus, Send, Loader2, X, FileIcon } from "lucide-react";
 import { MessageBubble } from "./MessageBubble";
 import { useThread } from "@/hooks/useMessages";
 import { useUser } from "@/hooks/useUser";
 import { Message } from "@/types/messages";
+import { MessagesAPI } from "@/lib/messages";
 
 interface Props {
   conversation?: any;
-  sendMessage: (receiverId: number, content: string) => void;
+  sendMessage: (receiverId: number, content: string, fileData?: { url: string, name: string, type: string }) => void;
 }
 
 export const ActiveThread = ({ conversation, sendMessage }: Props) => {
   const [text, setText] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: threadRes, isLoading } = useThread(conversation?.id);
   const { data: user } = useUser();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -25,10 +29,45 @@ export const ActiveThread = ({ conversation, sendMessage }: Props) => {
     }
   }, [messages]);
 
-  const handleSend = () => {
-    if (!text.trim() || !conversation?.id) return;
-    sendMessage(conversation.id, text);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size exceeds 5MB limit");
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const handleSend = async () => {
+    if ((!text.trim() && !selectedFile) || !conversation?.id) return;
+    
+    let fileData;
+    if (selectedFile) {
+      setIsUploading(true);
+      try {
+        const uploadRes = await MessagesAPI.uploadFile(selectedFile);
+        if (uploadRes.success) {
+          fileData = {
+            url: uploadRes.data.url,
+            name: uploadRes.data.name,
+            type: uploadRes.data.type
+          };
+        }
+      } catch (error) {
+        console.error("Upload failed", error);
+        alert("Failed to upload file");
+        setIsUploading(false);
+        return;
+      }
+    }
+
+    sendMessage(conversation.id, text, fileData);
     setText("");
+    setSelectedFile(null);
+    setIsUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   if (!conversation) return (
@@ -87,6 +126,26 @@ export const ActiveThread = ({ conversation, sendMessage }: Props) => {
 
       {/* Message Input Container */}
       <div className="p-6 border-t border-zinc-200 dark:border-zinc-800/40 bg-white dark:bg-zinc-900/10 shrink-0 transition-colors duration-300">
+        {selectedFile && (
+          <div className="mb-2 p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-between border border-zinc-200 dark:border-zinc-700 animate-in fade-in slide-in-from-bottom-1">
+            <div className="flex items-center space-x-3 overflow-hidden">
+              <div className="p-2 bg-white dark:bg-zinc-900 rounded-md">
+                <FileIcon size={20} className="text-emerald-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold truncate dark:text-zinc-200">{selectedFile.name}</p>
+                <p className="text-[10px] text-zinc-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setSelectedFile(null)}
+              className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full text-zinc-500 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         <div className="relative bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800/60 rounded-xl flex flex-col p-2 group focus-within:border-emerald-500/40 dark:focus-within:border-emerald-500/40 transition-colors shadow-inner">
           <div className="flex items-center space-x-2 mb-2 px-2">
             <button className="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200 dark:text-zinc-500 dark:hover:text-white dark:hover:bg-zinc-800 rounded-lg transition-colors"><Smile size={18} /></button>
@@ -103,12 +162,24 @@ export const ActiveThread = ({ conversation, sendMessage }: Props) => {
               className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] py-1.5 resize-none h-10 overflow-hidden text-zinc-900 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-600 font-medium transition-colors duration-300"
             />
             <div className="flex items-center space-x-1">
-              <button className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200 dark:text-zinc-500 dark:hover:text-white dark:hover:bg-zinc-800 rounded-lg transition-colors"><Paperclip size={18} /></button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200 dark:text-zinc-500 dark:hover:text-white dark:hover:bg-zinc-800 rounded-lg transition-colors"
+              >
+                <Paperclip size={18} />
+              </button>
               <button 
                 onClick={handleSend}
-                className="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white p-2.5 rounded-lg shadow-md dark:shadow-lg shadow-blue-500/20 dark:shadow-blue-900/20 active:scale-95 transition-all"
+                disabled={isUploading}
+                className="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white p-2.5 rounded-lg shadow-md dark:shadow-lg shadow-blue-500/20 dark:shadow-blue-900/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                  <Send size={18} />
+                  {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>
             </div>
           </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Wand2, Plus } from "lucide-react";
 import { ViewMode } from "@/types/generator";
-import { generatedResultsData } from "@/dummy-datas/generator";
+import { useGenerator } from "@/hooks/useGenerator";
 import { GeneratedCard } from "./GeneratedCard";
 
 interface Props {
@@ -9,6 +9,8 @@ interface Props {
 }
 
 export const ResultsView = ({ onGenerateMore }: Props) => {
+  const { results, isLoadingHistory, deleteItem } = useGenerator();
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -30,9 +32,29 @@ export const ResultsView = ({ onGenerateMore }: Props) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {generatedResultsData.map((item, index) => (
-          <GeneratedCard key={index} {...item} />
-        ))}
+        {isLoadingHistory ? (
+          <div className="col-span-full py-12 flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
+          </div>
+        ) : results.length > 0 ? (
+          results.map((item, index) => (
+            <GeneratedCard 
+              key={item.id || index} 
+              id={item.id}
+              title={item.title}
+              subject={item.subject || item.title}
+              type={item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+              description={item.content.substring(0, 150) + "..."}
+              tags={[item.type, item.grade || ""].filter(Boolean)}
+              pdf_url={item.pdf_url}
+              onDelete={deleteItem}
+            />
+          ))
+        ) : (
+          <div className="col-span-full py-12 text-center text-zinc-500 italic">
+            No content generated yet. Start by using the generator!
+          </div>
+        )}
       </div>
 
       <div className="bg-zinc-50 dark:bg-zinc-900/30 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800/60 border-dashed text-center transition-colors duration-300">

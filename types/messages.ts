@@ -20,6 +20,9 @@ export interface Message {
     sender_id: number;
     receiver_id: number;
     content: string;
+    file_url?: string;
+    file_name?: string;
+    file_type?: string;
     is_read: boolean;
     created_at: string;
 }

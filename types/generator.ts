@@ -12,9 +12,12 @@ export interface ContentTypeCardProps {
 }
 
 export interface GeneratedCardProps {
+  id: number;
   title: string;
   subject: string;
   description: string;
   tags: string[];
   type: string;
+  pdf_url?: string;
+  onDelete?: (id: number) => void;
 }
