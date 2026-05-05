@@ -1,10 +1,30 @@
 "use client";
 import React, { useState } from "react";
-import { Eye, Pencil, Share2 } from "lucide-react";
-import { recentResourcesData } from "@/dummy-datas/dashboard";
+import { Eye, Pencil, Share2, FileText, Activity, Users, Link as LinkIcon, FileJson, LucideIcon } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
-export const RecentResources = () => {
+const getTypeIcon = (type: string): LucideIcon => {
+  const t = type?.toLowerCase() || "";
+  if (t.includes("activity")) return Activity;
+  if (t.includes("worksheet") || t.includes("pdf") || t.includes("document")) return FileText;
+  if (t.includes("group")) return Users;
+  if (t.includes("link")) return LinkIcon;
+  return FileJson;
+};
+
+interface RecentResourcesProps {
+  resources?: any[];
+}
+
+export const RecentResources = ({ resources = [] }: RecentResourcesProps) => {
   const [activeTab, setActiveTab] = useState("Mine");
+
+  const filteredResources = resources.filter(res => {
+    if (activeTab === "Mine") return true;
+    if (activeTab === "Drafts") return !res.is_published;
+    if (activeTab === "Shared with me") return false; // Not implemented yet
+    return true;
+  });
 
   return (
     <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden transition-colors duration-300">
@@ -13,7 +33,7 @@ export const RecentResources = () => {
           Recent resources
         </h3>
         <div className="flex bg-zinc-100 dark:bg-zinc-950/60 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800/60 transition-colors duration-300">
-          {["Mine", "Shared with me", "Drafts"].map((tab) => (
+          {["Mine", "Drafts"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -41,54 +61,65 @@ export const RecentResources = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800/20 transition-colors duration-300">
-            {recentResourcesData.map((item, idx) => (
-              <tr
-                key={idx}
-                className="hover:bg-zinc-50 dark:hover:bg-zinc-800/10 transition-colors group"
-              >
-                <td className="px-6 py-4">
-                  <p className="text-[13px] font-bold text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                    {item.title}
-                  </p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">
-                    {item.subtitle}
-                  </p>
-                </td>
-                <td className="px-6 py-4 text-xs text-zinc-600 dark:text-zinc-400 font-medium">
-                  {item.subject}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-1.5 bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800/60 w-fit transition-colors duration-300">
-                    <item.typeIcon size={12} className="text-zinc-500" />
-                    <span className="text-[9px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-tight">
-                      {item.type}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-[11px] text-zinc-500">
-                  {item.last}
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <div className="flex items-center justify-end space-x-3 text-zinc-400 dark:text-zinc-500">
-                    <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                      <Eye size={15} />
-                    </button>
-                    <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                      <Pencil size={13} />
-                    </button>
-                    <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                      <Share2 size={14} />
-                    </button>
-                  </div>
+            {filteredResources.length > 0 ? (
+              filteredResources.slice(0, 5).map((item, idx) => {
+                const Icon = getTypeIcon(item.type);
+                return (
+                  <tr
+                    key={item.collection_id || idx}
+                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/10 transition-colors group"
+                  >
+                    <td className="px-6 py-4">
+                      <p className="text-[13px] font-bold text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        {item.title}
+                      </p>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        {item.grade} · {item.likes} likes
+                      </p>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-zinc-600 dark:text-zinc-400 font-medium">
+                      {item.category}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-1.5 bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800/60 w-fit transition-colors duration-300">
+                        <Icon size={12} className="text-zinc-500" />
+                        <span className="text-[9px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-tight">
+                          {item.type}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-[11px] text-zinc-500">
+                      {item.updated_at ? formatDistanceToNow(new Date(item.updated_at), { addSuffix: true }) : "Unknown"}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end space-x-3 text-zinc-400 dark:text-zinc-500">
+                        <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                          <Eye size={15} />
+                        </button>
+                        <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                          <Pencil size={13} />
+                        </button>
+                        <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                          <Share2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={5} className="px-6 py-10 text-center text-zinc-500 text-sm italic">
+                  No resources found in this category.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
       <div className="p-4 border-t border-zinc-200 dark:border-zinc-800/30 text-center bg-zinc-50 dark:bg-zinc-950/20 transition-colors duration-300">
         <p className="text-[11px] text-zinc-500 dark:text-zinc-600">
-          Showing activity from the last 7 days. Go to{" "}
+          Showing activity from your recent uploads. Go to{" "}
           <span className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold cursor-pointer transition-colors">
             My Resources
           </span>{" "}

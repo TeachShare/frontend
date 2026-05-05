@@ -1,8 +1,8 @@
 import { api } from "./axios";
 
 export const TeacherAPI = {
-  getTeachers: async () => {
-    const response = await api.get('/teachers/');
+  getTeachers: async (page = 1, perPage = 20) => {
+    const response = await api.get(`/teachers/?page=${page}&per_page=${perPage}`);
     return response.data;
   },
 

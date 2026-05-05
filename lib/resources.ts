@@ -2,9 +2,9 @@
 import { api } from "./axios"; // Your custom axios instance
 
 export const ResourceAPI = {
-  getMyResources: async () => {
+  getMyResources: async (page = 1) => {
     // Make sure the URL prefix matches your Flask blueprint setup
-    const response = await api.get('/resource_collection/my-resources'); 
+    const response = await api.get(`/resource_collection/my-resources?page=${page}`); 
     return response.data;
   }
 };

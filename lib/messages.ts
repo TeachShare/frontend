@@ -6,8 +6,8 @@ export const MessagesAPI = {
     return response.data;
   },
   
-  getThread: async (partnerId: number | string) => {
-    const response = await api.get(`/messages/thread/${partnerId}`);
+  getThread: async (partnerId: number | string, page = 1) => {
+    const response = await api.get(`/messages/thread/${partnerId}?page=${page}`);
     return response.data;
   },
 

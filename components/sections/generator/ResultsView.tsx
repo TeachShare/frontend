@@ -3,6 +3,7 @@ import { Wand2, Plus } from "lucide-react";
 import { ViewMode } from "@/types/generator";
 import { useGenerator } from "@/hooks/useGenerator";
 import { GeneratedCard } from "./GeneratedCard";
+import { SkeletonGeneratedCard } from "./GeneratorSkeletons";
 
 interface Props {
   onGenerateMore: (view: ViewMode) => void;
@@ -33,9 +34,12 @@ export const ResultsView = ({ onGenerateMore }: Props) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {isLoadingHistory ? (
-          <div className="col-span-full py-12 flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-          </div>
+          <>
+            <SkeletonGeneratedCard />
+            <SkeletonGeneratedCard />
+            <SkeletonGeneratedCard />
+            <SkeletonGeneratedCard />
+          </>
         ) : results.length > 0 ? (
           results.map((item, index) => (
             <GeneratedCard 

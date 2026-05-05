@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
 
 import { DashboardHeader } from '@/components/sections/dashboard/DashboardHeader';
@@ -9,38 +9,31 @@ import { RecentResources } from '@/components/sections/dashboard/RecentResources
 import { TeachingFocus } from '@/components/sections/dashboard/TeachingFocus';
 import { ActivitySnapshot } from '@/components/sections/dashboard/ActivitySnapshot';
 import { useUser } from '@/hooks/useUser';
-import { Loader2 } from 'lucide-react';
+import { useMyResources } from '@/hooks/useResources';
+import { useFeed } from '@/hooks/useCommunity';
+import { useDashboardStats } from '@/hooks/useDashboard';
+import { 
+  SkeletonStatCard, 
+  SkeletonGreetingCard, 
+  SkeletonRecentResources, 
+  SkeletonTeachingFocus, 
+  SkeletonActivitySnapshot 
+} from '@/components/sections/dashboard/DashboardSkeletons';
 
 const Page = () => {
-  const { data: user, isLoading }: any = useUser();
+  const { data: user, isLoading: isUserLoading }: any = useUser();
+  const { data: myResourcesResponse, isLoading: isResourcesLoading } = useMyResources(1);
+  const { data: feedData, isLoading: isFeedLoading } = useFeed(1);
+  const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const myResources = myResourcesResponse?.resources || [];
+  const communityPosts = feedData?.posts || [];
   
-  // Destructure isLoading
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      if (!mobile) setIsSidebarOpen(true);
-      else setIsSidebarOpen(false);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // 1. GLOBAL LOADING STATE (Optional)
-  // If you want the whole dashboard to wait for the user object
-  if (isLoading) {
-    return (
-      <Layout>
-        <main className="flex-1 flex items-center justify-center bg-zinc-50 dark:bg-[#090a0c]">
-          <Loader2 className="animate-spin text-zinc-400" size={32} />
-        </main>
-      </Layout>
-    );
-  }
+  // Calculate Stats fallback if stats hook fails or is loading
+  const totalResources = stats?.total_resources ?? myResources.length;
+  const totalLikes = stats?.total_likes ?? 0;
+  const publishedCount = stats?.published_count ?? myResources.filter((res: any) => res.is_published).length;
+  const draftCount = stats?.draft_count ?? (totalResources - publishedCount);
 
   return (
     <Layout>
@@ -53,23 +46,54 @@ const Page = () => {
             
             {/* Left Column */}
             <div className="col-span-12 lg:col-span-8 space-y-6">
-              {/* Now user.last_name is guaranteed to exist */}
-              <GreetingCard lastName={user?.last_name}/> 
+              {isUserLoading ? (
+                <SkeletonGreetingCard />
+              ) : (
+                <GreetingCard 
+                  lastName={user?.last_name} 
+                  role={user?.role} 
+                  institution={user?.institution} 
+                  resourcesCount={totalResources}
+                /> 
+              )}
               
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                <StatCard title="Resources shared" value="48" subtext="All-time uploads" trend="+6" />
-                <StatCard title="Total downloads" value="1.9k" subtext="Compared to last 30 days" trend="+18%" />
-                <StatCard title="Achievements" value="7" subtext='"Collaborative Planner" unlocked' badge="New badge" />
-                <StatCard title="Community shares" value="23" subtext="Your resources reshared by others" trend="+4" />
+                {isStatsLoading ? (
+                  <>
+                    <SkeletonStatCard />
+                    <SkeletonStatCard />
+                    <SkeletonStatCard />
+                    <SkeletonStatCard />
+                  </>
+                ) : (
+                  <>
+                    <StatCard title="Resources shared" value={totalResources.toString()} subtext="All-time uploads" trend={totalResources > 0 ? `+${totalResources}` : "0"} />
+                    <StatCard title="Total likes" value={totalLikes >= 1000 ? `${(totalLikes/1000).toFixed(1)}k` : totalLikes.toString()} subtext="Across all resources" trend="+0" />
+                    <StatCard title="Published" value={publishedCount.toString()} subtext="Live in repository" badge="Active" />
+                    <StatCard title="Drafts" value={draftCount.toString()} subtext="Waiting for polish" />
+                  </>
+                )}
               </div>
 
-              <RecentResources />
+              {isResourcesLoading ? (
+                <SkeletonRecentResources />
+              ) : (
+                <RecentResources resources={myResources} />
+              )}
             </div>
 
             {/* Right Column */}
             <div className="col-span-12 lg:col-span-4 space-y-6">
-              <TeachingFocus />
-              <ActivitySnapshot />
+              {isResourcesLoading ? (
+                <SkeletonTeachingFocus />
+              ) : (
+                <TeachingFocus resources={myResources} />
+              )}
+              {isFeedLoading ? (
+                <SkeletonActivitySnapshot />
+              ) : (
+                <ActivitySnapshot posts={communityPosts} />
+              )}
             </div>
 
           </div>

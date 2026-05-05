@@ -11,6 +11,7 @@ import {
 import { ContentType, ViewMode } from "@/types/generator";
 import { ContentTypeCard } from "./ContentTypeCard";
 import { useGenerator } from "@/hooks/useGenerator";
+import { useMetadata } from "@/hooks/useMetadata";
 
 interface Props {
   onSuccess: () => void;
@@ -19,10 +20,11 @@ interface Props {
 export const GeneratorForm = ({ onSuccess }: Props) => {
   const [selectedType, setSelectedType] = useState<ContentType>("classroom");
   const { generate, isGenerating, error: apiError } = useGenerator();
+  const { data: metadata, isLoading: isMetadataLoading } = useMetadata();
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const [subject, setSubject] = useState<string>("Computer Science");
-  const [grade, setGrade] = useState<string>("University");
+  const [subject, setSubject] = useState<string>("Mathematics");
+  const [grade, setGrade] = useState<string>("Grade 10");
   const [objectives, setObjectives] = useState<string>("");
 
   const handleGenerate = async () => {
@@ -92,11 +94,16 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-[13px] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500/30 text-zinc-900 dark:text-zinc-300 transition-colors duration-300"
+                  disabled={isMetadataLoading}
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-[13px] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500/30 text-zinc-900 dark:text-zinc-300 transition-colors duration-300 disabled:opacity-50"
                 >
-                  <option>Computer Science</option>
-                  <option>Mathematics</option>
-                  <option>Physics</option>
+                  {isMetadataLoading ? (
+                    <option>Loading...</option>
+                  ) : (
+                    metadata?.subjects?.map((s: any) => (
+                      <option key={s.id} value={s.name}>{s.name}</option>
+                    ))
+                  )}
                 </select>
                 <ChevronDown
                   size={14}
@@ -114,11 +121,16 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
                 <select
                   value={grade}
                   onChange={(e) => setGrade(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-[13px] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500/30 text-zinc-900 dark:text-zinc-300 transition-colors duration-300"
+                  disabled={isMetadataLoading}
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-[13px] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500/30 text-zinc-900 dark:text-zinc-300 transition-colors duration-300 disabled:opacity-50"
                 >
-                  <option>University</option>
-                  <option>High School</option>
-                  <option>Middle School</option>
+                  {isMetadataLoading ? (
+                    <option>Loading...</option>
+                  ) : (
+                    metadata?.grade_levels?.map((g: any) => (
+                      <option key={g.id} value={g.name}>{g.name}</option>
+                    ))
+                  )}
                 </select>
                 <ChevronDown
                   size={14}

@@ -82,7 +82,25 @@
     // 2. NOW WE CAN SAFELY RETURN EARLY
     if (isLoading) {
       return (
-        <header className="h-[64px] bg-white dark:bg-[#090a0c] border-b border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between px-4 lg:px-8"></header>
+        <header className="h-[64px] bg-white dark:bg-[#090a0c] border-b border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between px-4 lg:px-8 shrink-0">
+          <div className="flex items-center flex-1 max-w-2xl">
+            <div className="lg:hidden p-2 mr-2">
+              <div className="w-5 h-5 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+            </div>
+            <div className="relative w-full max-w-xl">
+               <div className="h-9 w-full bg-zinc-100 dark:bg-zinc-800/40 rounded-full animate-pulse" />
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+             <div className="flex items-center space-x-3 border-l border-zinc-200 dark:border-zinc-800 pl-4 h-8">
+                <div className="text-right hidden sm:block space-y-2">
+                   <div className="h-3 w-24 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                   <div className="h-2 w-16 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse ml-auto" />
+                </div>
+                <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+             </div>
+          </div>
+        </header>
       );
     }
 

@@ -11,12 +11,12 @@ export const useConversations = () => {
   });
 };
 
-export const useThread = (partnerId: number | string) => {
+export const useThread = (partnerId: number | string, page = 1) => {
   const queryClient = useQueryClient();
   return useQuery({
-    queryKey: ["thread", partnerId],
+    queryKey: ["thread", partnerId, page],
     queryFn: async () => {
-        const res = await MessagesAPI.getThread(partnerId);
+        const res = await MessagesAPI.getThread(partnerId, page);
         // After fetching thread (which marks as read in backend), update conversations list
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
         return res;

@@ -12,6 +12,7 @@ import { RichTextEditor } from "@/components/sections/resources/create/RichTextE
 import { FileUploader } from "@/components/sections/resources/create/FileUploader";
 import { PublishSidebar } from "@/components/sections/resources/create/PublishSidebar";
 import { Loader2, AlertCircle } from "lucide-react";
+import { SkeletonCreatorWorkspace } from "@/components/sections/resources/create/CreatorSkeletons";
 
 const CreateResourceContent = () => {
   const router = useRouter();
@@ -221,15 +222,8 @@ const CreateResourceContent = () => {
   if (isMetadataLoading || isFetchingData) {
     return (
       <Layout>
-        <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] flex items-center justify-center min-h-screen">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="animate-spin text-zinc-400" size={40} />
-            <p className="text-zinc-500 text-sm font-medium animate-pulse">
-              {isEditMode
-                ? "Fetching resource data..."
-                : "Preparing workspace..."}
-            </p>
-          </div>
+        <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] min-h-screen overflow-y-auto">
+          <SkeletonCreatorWorkspace />
         </main>
       </Layout>
     );

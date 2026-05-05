@@ -8,13 +8,31 @@ import { PostItem } from "@/components/sections/community/PostItem";
 import { EducatorCard } from "@/components/sections/community/EducatorCard";
 import { useFeed, useCreatePost } from "@/hooks/useCommunity"; 
 import { useTeachers } from "@/hooks/useTeacher";
+import { SkeletonPostItem, SkeletonEducatorCard } from "@/components/sections/community/CommunitySkeletons";
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState<'feed' | 'discover'>('feed');
+  const [educatorsPage, setEducatorsPage] = useState(1);
+  const [allEducators, setAllEducators] = useState<any[]>([]);
   
   const { data: feedData, isLoading: feedLoading, isError: feedError } = useFeed(1);
-  const { data: teachersRes, isLoading: teachersLoading } = useTeachers();
+  const { data: teachersRes, isLoading: teachersLoading, isFetching: teachersFetching } = useTeachers(educatorsPage);
   const createPostMutation = useCreatePost();
+
+  React.useEffect(() => {
+    if (teachersRes?.teachers) {
+      if (educatorsPage === 1) {
+        setAllEducators(teachersRes.teachers);
+      } else {
+        setAllEducators(prev => {
+          const newTeachers = teachersRes.teachers.filter(
+            (nt: any) => !prev.some(pt => pt.id === nt.id)
+          );
+          return [...prev, ...newTeachers];
+        });
+      }
+    }
+  }, [teachersRes, educatorsPage]);
 
   const handleAddPost = async (content: string, attachments: Attachment[]) => {
     const libraryAtt = attachments.find(a => a.type === 'library');
@@ -23,8 +41,6 @@ const Page = () => {
       linkedResourceId: libraryAtt?.resourceId 
     });
   };
-
-  const teachers = teachersRes?.data || [];
 
   return (
     <Layout>
@@ -58,9 +74,7 @@ const Page = () => {
                 <PostCreator onPublish={handleAddPost} />
                 <div className="space-y-6 pb-20">
                     {feedLoading ? (
-                    <div className="flex justify-center py-10 text-emerald-500">
-                        <Loader2 className="animate-spin" size={32} />
-                    </div>
+                      [...Array(3)].map((_, i) => <SkeletonPostItem key={i} />)
                     ) : feedError ? (
                     <p className="text-center text-rose-500 py-10">Failed to load feed.</p>
                     ) : (
@@ -71,32 +85,47 @@ const Page = () => {
                 </div>
               </>
           ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                {teachersLoading ? (
-                    <div className="col-span-2 flex justify-center py-20">
-                        <Loader2 className="animate-spin text-emerald-500" size={32} />
-                    </div>
-                ) : teachers.length > 0 ? (
-                    teachers.map((teacher: any) => (
-                        <EducatorCard 
-                            key={teacher.id}
-                            id={teacher.id}
-                            name={`${teacher.first_name} ${teacher.last_name}`}
-                            role={teacher.role}
-                            avatar={teacher.profile_image_url}
-                            resources={teacher.stats.resources.toString()}
-                            followers={teacher.stats.followers.toString()}
-                            coTeaching="0" // Placeholder
-                            alignment={80} // Placeholder
-                            tags={[]} // Placeholder or can be derived
-                            specialTags={teacher.is_verified ? ["Verified"] : []}
-                            following={teacher.is_following}
-                        />
-                    ))
-                ) : (
-                    <div className="col-span-2 flex flex-col items-center justify-center py-32 text-zinc-500/50">
-                        <Users size={48} className="mb-4 opacity-20" />
-                        <p className="italic text-sm">No educators to discover right now.</p>
+              <div className="space-y-6 pb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {allEducators.length > 0 ? (
+                        allEducators.map((teacher: any) => (
+                            <EducatorCard 
+                                key={teacher.id}
+                                id={teacher.id}
+                                name={`${teacher.first_name} ${teacher.last_name}`}
+                                role={teacher.role}
+                                avatar={teacher.profile_image_url}
+                                resources={teacher.stats.resources.toString()}
+                                followers={teacher.stats.followers.toString()}
+                                coTeaching="0" 
+                                alignment={teacher.alignment || 0}
+                                tags={teacher.tags || []}
+                                specialTags={teacher.is_verified ? ["Verified"] : []}
+                                following={teacher.is_following}
+                            />
+                        ))
+                    ) : !teachersLoading && (
+                        <div className="col-span-2 flex flex-col items-center justify-center py-32 text-zinc-500/50">
+                            <Users size={48} className="mb-4 opacity-20" />
+                            <p className="italic text-sm">No educators to discover right now.</p>
+                        </div>
+                    )}
+                    
+                    {teachersLoading && educatorsPage === 1 && (
+                        [...Array(4)].map((_, i) => <SkeletonEducatorCard key={i} />)
+                    )}
+                </div>
+
+                {teachersRes?.has_next && (
+                    <div className="flex justify-center pt-8">
+                        <button 
+                            onClick={() => setEducatorsPage(prev => prev + 1)}
+                            disabled={teachersFetching}
+                            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-8 py-3 rounded-xl text-sm font-bold text-zinc-600 dark:text-zinc-400 hover:border-emerald-500/50 hover:text-emerald-500 transition-all disabled:opacity-50 flex items-center gap-2"
+                        >
+                            {teachersFetching && <Loader2 size={16} className="animate-spin" />}
+                            {teachersFetching ? "Loading..." : "Load More Educators"}
+                        </button>
                     </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
-import { Search, Loader2, SlidersHorizontal } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import { api } from "@/lib/axios";
@@ -12,6 +12,7 @@ import { useMetadata } from "@/hooks/useMetadata";
 import { RemixModal } from "@/components/sections/repository/RemixModal";
 import { RepositoryItemCard } from "@/components/sections/repository/RepositoryItemCard";
 import { FilterGroup } from "@/components/sections/repository/FilterGroup";
+import { SkeletonRepositoryCard } from "@/components/sections/repository/RepositorySkeletons";
 
 const RepositoryPage = () => {
   const router = useRouter();
@@ -21,43 +22,65 @@ const RepositoryPage = () => {
   
   const [resources, setResources] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [isRemixing, setIsRemixing] = useState(false);
   const [remixItem, setRemixItem] = useState<any | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [filters, setFilters] = useState({
     query: "",
-    subject: "All Subjects",
-    grade: "All Grades",
-    type: "All Types"
+    subject_id: "",
+    grade_level_id: "",
+    content_type_id: ""
   });
 
-  // Fetch Community Discovery Data
-  useEffect(() => {
-    const fetchDiscoveryData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await api.get("/resource_collection/discover");
-        if (response.data.success) setResources(response.data.data);
-      } catch (err) {
-        console.error("Discovery fetch error:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchDiscoveryData();
-  }, []);
+  const fetchDiscoveryData = async (currentPage: number, currentFilters: typeof filters) => {
+    try {
+      if (currentPage === 1) setIsLoading(true);
+      else setIsFetching(true);
 
-  // Filter Logic - useMemo ensures smooth searching even as the list grows
-  const filteredResources = useMemo(() => {
-    return resources.filter((res) => {
-      const matchesSearch = res.title.toLowerCase().includes(filters.query.toLowerCase()) ||
-                           res.tags?.some((t: string) => t.toLowerCase().includes(filters.query.toLowerCase()));
-      const matchesSubj = filters.subject === "All Subjects" || res.subject === filters.subject;
-      const matchesGrade = filters.grade === "All Grades" || res.grade === filters.grade;
-      const matchesType = filters.type === "All Types" || res.type === filters.type;
-      return matchesSearch && matchesSubj && matchesGrade && matchesType;
-    });
-  }, [resources, filters]);
+      const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      if (currentFilters.query) params.append('search', currentFilters.query);
+      if (currentFilters.subject_id) params.append('subject_id', currentFilters.subject_id);
+      if (currentFilters.grade_level_id) params.append('grade_level_id', currentFilters.grade_level_id);
+      if (currentFilters.content_type_id) params.append('content_type_id', currentFilters.content_type_id);
+
+      const response = await api.get(`/resource_collection/discover?${params.toString()}`);
+      if (response.data.success) {
+        if (currentPage === 1) {
+          setResources(response.data.resources);
+        } else {
+          setResources(prev => {
+            const newRes = response.data.resources.filter(
+              (nr: any) => !prev.some(pr => pr.collection_id === nr.collection_id)
+            );
+            return [...prev, ...newRes];
+          });
+        }
+        setHasNext(response.data.has_next);
+        setTotalCount(response.data.total_count || 0);
+      }
+    } catch (err) {
+      console.error("Discovery fetch error:", err);
+    } finally {
+      setIsLoading(false);
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchDiscoveryData(page, filters);
+    }, filters.query ? 400 : 0);
+    return () => clearTimeout(timer);
+  }, [page, filters]);
 
   const handleConfirmRemix = async () => {
     if (!remixItem || !remixItem.collection_id) return;
@@ -104,7 +127,7 @@ const RepositoryPage = () => {
 
   return (
     <Layout>
-      <main className="flex-1 flex flex-col min-w-0  transition-colors duration-300">
+      <main className="flex-1 flex flex-col min-w-0 transition-colors duration-300">
         <RemixModal
           isOpen={!!remixItem}
           item={remixItem}
@@ -130,7 +153,7 @@ const RepositoryPage = () => {
                 <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-tighter">Avg Rating</p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-black text-white leading-none">{resources.length}</p>
+                <p className="text-lg font-black text-white leading-none">{totalCount}</p>
                 <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-tighter">Snapshots</p>
               </div>
             </div>
@@ -152,53 +175,74 @@ const RepositoryPage = () => {
            <div className="flex flex-wrap gap-3">
               <FilterGroup 
                 label="Subject" 
-                value={filters.subject} 
-                // Ensure we map the object to a string if backend returns objects
-                options={["All Subjects", ...(metadata?.subjects?.map((s: any) => typeof s === 'string' ? s : s.name) || [])]} 
-                onChange={(v: string) => setFilters({...filters, subject: v})} 
+                value={metadata?.subjects?.find((s: any) => s.id.toString() === filters.subject_id)?.name || "All Subjects"} 
+                options={["All Subjects", ...(metadata?.subjects?.map((s: any) => s.name) || [])]} 
+                onChange={(v: string) => {
+                  const sub = metadata?.subjects?.find((s: any) => s.name === v);
+                  setFilters({...filters, subject_id: sub ? sub.id.toString() : ""});
+                }} 
                 isLoading={isMetaLoading}
               />
               <FilterGroup 
                 label="Grade" 
-                value={filters.grade} 
-                options={["All Grades", ...(metadata?.grades?.map((g: any) => typeof g === 'string' ? g : g.name) || [])]} 
-                onChange={(v: string) => setFilters({...filters, grade: v})} 
+                value={metadata?.grade_levels?.find((g: any) => g.id.toString() === filters.grade_level_id)?.name || "All Grades"} 
+                options={["All Grades", ...(metadata?.grade_levels?.map((g: any) => g.name) || [])]} 
+                onChange={(v: string) => {
+                  const gr = metadata?.grade_levels?.find((g: any) => g.name === v);
+                  setFilters({...filters, grade_level_id: gr ? gr.id.toString() : ""});
+                }} 
                 isLoading={isMetaLoading}
               />
               <FilterGroup 
                 label="Type" 
-                value={filters.type} 
-                options={["All Types", ...(metadata?.resource_types?.map((t: any) => typeof t === 'string' ? t : t.name) || [])]} 
-                onChange={(v: string) => setFilters({...filters, type: v})} 
+                value={metadata?.content_types?.find((t: any) => t.id.toString() === filters.content_type_id)?.name || "All Types"} 
+                options={["All Types", ...(metadata?.content_types?.map((t: any) => t.name) || [])]} 
+                onChange={(v: string) => {
+                  const ct = metadata?.content_types?.find((t: any) => t.name === v);
+                  setFilters({...filters, content_type_id: ct ? ct.id.toString() : ""});
+                }} 
                 isLoading={isMetaLoading}
               />
             </div>
           </div>
 
-          {/* Results Grid */}
-          {isLoading ? (
-            <div className="h-64 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="animate-spin text-emerald-500" size={32} />
-              <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] font-mono">Fetching Assets...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
-              {filteredResources.length > 0 ? (
-                filteredResources.map((resource) => (
-                  <RepositoryItemCard
-                    key={resource.collection_id}
-                    data={resource}
-                    onDownload={() => handleDownload(resource.collection_id)}
-                    onRemix={() => setRemixItem(resource)}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full py-20 text-center border border-dashed border-[#1F2226] rounded-xl">
-                  <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">No resources found</p>
+          <div className="space-y-8 pb-20">
+            {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                    <SkeletonRepositoryCard key={i} />
+                ))}
                 </div>
-              )}
-            </div>
-          )}
+            ) : resources.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {resources.map((resource) => (
+                    <RepositoryItemCard
+                        key={resource.collection_id}
+                        data={resource}
+                        onDownload={() => handleDownload(resource.collection_id)}
+                        onRemix={() => setRemixItem(resource)}
+                    />
+                ))}
+                </div>
+            ) : (
+                <div className="py-20 text-center border border-dashed border-[#1F2226] rounded-xl">
+                    <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">No resources found</p>
+                </div>
+            )}
+
+            {hasNext && (
+                <div className="flex justify-center">
+                    <button 
+                        onClick={() => setPage(prev => prev + 1)}
+                        disabled={isFetching}
+                        className="bg-[#121417] border border-[#1F2226] px-10 py-3 rounded-xl text-sm font-bold text-zinc-400 hover:border-emerald-500/50 hover:text-emerald-500 transition-all disabled:opacity-50 flex items-center gap-2"
+                    >
+                        {isFetching && <Loader2 size={16} className="animate-spin" />}
+                        {isFetching ? "Syncing..." : "Load More Discoveries"}
+                    </button>
+                </div>
+            )}
+          </div>
         </div>
       </main>
     </Layout>

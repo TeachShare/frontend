@@ -17,17 +17,54 @@ export const ActiveThread = ({ conversation, sendMessage }: Props) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { data: threadRes, isLoading } = useThread(conversation?.id);
+  const [messagePage, setMessagePage] = useState(1);
+  const [allMessages, setAllMessages] = useState<Message[]>([]);
+  
+  const { data: threadRes, isLoading, isFetching } = useThread(conversation?.id, messagePage);
   const { data: user } = useUser();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const prevScrollHeightRef = useRef<number>(0);
 
-  const messages: Message[] = threadRes?.data || [];
+  // Reset when conversation changes
+  useEffect(() => {
+    setMessagePage(1);
+    setAllMessages([]);
+  }, [conversation?.id]);
+
+  useEffect(() => {
+    if (threadRes?.messages) {
+      if (messagePage === 1) {
+        setAllMessages(threadRes.messages);
+      } else {
+        setAllMessages(prev => {
+          // Prepend earlier messages
+          const newMsgs = threadRes.messages.filter(
+            (nm: Message) => !prev.some(pm => pm.id === nm.id)
+          );
+          return [...newMsgs, ...prev];
+        });
+      }
+    }
+  }, [threadRes, messagePage]);
 
   useEffect(() => {
     if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        if (messagePage === 1) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        } else {
+            // Maintain scroll position when loading earlier messages
+            const currentScrollHeight = scrollRef.current.scrollHeight;
+            scrollRef.current.scrollTop = currentScrollHeight - prevScrollHeightRef.current;
+        }
     }
-  }, [messages]);
+  }, [allMessages, messagePage]);
+
+  const handleLoadEarlier = () => {
+    if (scrollRef.current) {
+        prevScrollHeightRef.current = scrollRef.current.scrollHeight;
+    }
+    setMessagePage(prev => prev + 1);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -105,12 +142,24 @@ export const ActiveThread = ({ conversation, sendMessage }: Props) => {
 
       {/* Chat Messages Area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-2 scrollbar-hide min-h-0">
-        {isLoading ? (
+        {threadRes?.has_next && (
+            <div className="flex justify-center pb-6">
+                <button 
+                    onClick={handleLoadEarlier}
+                    disabled={isFetching}
+                    className="text-[11px] font-bold text-zinc-500 hover:text-emerald-500 transition-colors bg-zinc-100/50 dark:bg-zinc-800/30 px-4 py-1.5 rounded-full border border-zinc-200/50 dark:border-zinc-700/30"
+                >
+                    {isFetching ? "Loading earlier..." : "Load earlier messages"}
+                </button>
+            </div>
+        )}
+
+        {isLoading && messagePage === 1 ? (
             <div className="flex justify-center py-10">
                 <Loader2 className="animate-spin text-emerald-500" size={32} />
             </div>
-        ) : messages.length > 0 ? (
-            messages.map((msg) => (
+        ) : allMessages.length > 0 ? (
+            allMessages.map((msg) => (
                 <MessageBubble 
                     key={msg.id} 
                     message={msg} 

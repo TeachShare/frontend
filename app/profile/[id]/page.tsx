@@ -16,6 +16,7 @@ import Layout from "@/components/layout/Layout";
 import { useTeacherProfile, useTeacherResources, useToggleFollow } from "@/hooks/useTeacher";
 import { useUser } from "@/hooks/useUser";
 import { useSocket } from "@/hooks/useMessages";
+import { SkeletonProfileHeader, SkeletonProfileResourceCard } from "@/components/sections/profile/ProfileSkeletons";
 
 const UsersIcon = ({ size }: { size: number }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -106,9 +107,14 @@ const ProfileContent = () => {
 
     if (profileLoading) {
         return (
-            <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
-            </div>
+            <main className="flex-1 p-8">
+                <div className="max-w-6xl mx-auto">
+                    <SkeletonProfileHeader />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[...Array(2)].map((_, i) => <SkeletonProfileResourceCard key={i} />)}
+                    </div>
+                </div>
+            </main>
         );
     }
 
@@ -243,7 +249,7 @@ const ProfileContent = () => {
                 {activeTab === 'resources' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {resourcesLoading ? (
-                            <div className="col-span-2 py-12 text-center text-gray-500">Loading resources...</div>
+                            [...Array(2)].map((_, i) => <SkeletonProfileResourceCard key={i} />)
                         ) : resources.length > 0 ? (
                             resources.map((resource: any) => (
                                 <ResourceCard key={resource.collection_id} resource={resource} colors={colors} />
@@ -261,7 +267,16 @@ const ProfileContent = () => {
 const EducatorProfile = () => {
     return (
         <Layout>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={
+                <main className="flex-1 p-8">
+                    <div className="max-w-6xl mx-auto">
+                        <SkeletonProfileHeader />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {[...Array(2)].map((_, i) => <SkeletonProfileResourceCard key={i} />)}
+                        </div>
+                    </div>
+                </main>
+            }>
                 <ProfileContent />
             </Suspense>
         </Layout>

@@ -12,6 +12,7 @@ import { DetailContent } from "@/components/sections/resources/detail/DetailCont
 import { DetailSidebar } from "@/components/sections/resources/detail/DetailSidebar";
 import { ReviewSection } from "@/components/sections/resources/detail/ReviewSection";
 import { RemixModal } from "@/components/sections/repository/RemixModal";
+import { SkeletonResourceDetail } from "@/components/sections/resources/ResourceSkeletons";
 
 const ResourceDetailView = () => {
   const { id } = useParams();
@@ -120,9 +121,9 @@ const ResourceDetailView = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex-1 bg-zinc-50 dark:bg-[#090a0c] flex items-center justify-center">
-          <span className="text-zinc-500 font-bold animate-pulse text-sm">Tracing resource...</span>
-        </div>
+        <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] min-h-screen overflow-y-auto">
+          <SkeletonResourceDetail />
+        </main>
       </Layout>
     );
   }

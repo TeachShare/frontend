@@ -27,7 +27,7 @@ const CompareVersionsPage = () => {
   // Extract base ID from the URL (e.g., "38-lesson-plan" -> "38")
   const currentId = typeof params.id === 'string' ? params.id.split("-")[0] : null;
   const compareWithId = searchParams.get("with"); // The version the user clicked to compare
-
+  console.log(currentId)
   const [allVersions, setAllVersions] = useState<any[]>([]);
   const [compareData, setCompareData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +42,7 @@ const CompareVersionsPage = () => {
         const versions = historyRes.data.data;
         setAllVersions(versions);
 
+        console.log(versions)
         // 2. Fetch the comparison between the selected "with" ID and the current ID
         // If no "with" is provided, default to the second newest version (v4 vs v5)
         const targetId = compareWithId || versions[1]?.collection_id;
