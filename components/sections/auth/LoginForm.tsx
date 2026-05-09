@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { api } from "@/lib/axios";
@@ -12,6 +12,8 @@ const toastStyle = {
     background: "var(--toast-bg, #161b22)",
     color: "var(--toast-text, #fff)",
     border: "1px solid var(--toast-border, #30363d)",
+    fontSize: "13px",
+    fontWeight: "500",
   },
   success: {
     iconTheme: { primary: "#238636", secondary: "#fff" },
@@ -26,7 +28,9 @@ export const LoginForm = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return toast.error("Please fill in all fields");
+    if (!email || !password) {
+      return toast.error("Please fill in all fields", { icon: <AlertCircle className="text-rose-500" size={18} /> });
+    }
 
     setLoading(true);
     try {
@@ -64,29 +68,29 @@ export const LoginForm = () => {
   return (
     <form className="space-y-4" onSubmit={handleLogin}>
       <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide transition-colors duration-300">
-          Email
+        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
+          Work email
         </label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58] transition-colors duration-300" size={16} />
+        <div className="relative group">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
           <input
             type="email" value={email} onChange={(e) => setEmail(e.target.value)}
             placeholder="name@school.edu"
-            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636] transition-all"
+            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3.5 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
           />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide transition-colors duration-300">
+        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
           Password
         </label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58] transition-colors duration-300" size={16} />
+        <div className="relative group">
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
           <input
             type="password" value={password} onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636] transition-all"
+            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3.5 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
           />
         </div>
       </div>
@@ -103,8 +107,8 @@ export const LoginForm = () => {
         </button>
       </div>
 
-      <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-[#238636] dark:hover:bg-[#2ea043] active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 dark:shadow-none mt-4 text-sm">
-        {loading ? "Processing..." : "Login"}
+      <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-[#238636] dark:hover:bg-[#2ea043] active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 dark:shadow-none mt-4 text-sm">
+        {loading ? "Signing you in..." : "Login"}
       </button>
 
       <div className="relative flex items-center py-2">

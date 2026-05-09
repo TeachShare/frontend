@@ -51,6 +51,8 @@ const MyResourcesPage = () => {
   })
 
   const [page, setPage] = useState(1);
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [bulkActionType, setBulkActionType] = useState<'delete' | 'make_private' | 'make_public' | null>(null);
 
   const fetchMyResources = React.useCallback(async (currentFilters: typeof filters, currentPage: number) => {
     try {
@@ -95,7 +97,15 @@ const MyResourcesPage = () => {
   };
 
   const handleBulkAction = async (action: 'delete' | 'make_private' | 'make_public') => {
-    if (action === 'delete' && !window.confirm(`Are you sure you want to delete ${selectedIds.length} resources?`)) return;
+    if (action === 'delete' && !showBulkConfirm) {
+      setBulkActionType('delete');
+      setShowBulkConfirm(true);
+      return;
+    }
+
+    // Close modal immediately upon confirmation to show processing state
+    setShowBulkConfirm(false);
+    setBulkActionType(null);
 
     try {
       setIsBulkActing(true);
@@ -111,6 +121,8 @@ const MyResourcesPage = () => {
     } catch (err: unknown) {
       const apiError = err as { response?: { data?: { error?: string } } };
       toast.error(apiError.response?.data?.error || "Bulk action failed");
+      // If it failed, we don't necessarily want to reopen the modal, 
+      // but the user can try again from the bulk bar.
     } finally {
       setIsBulkActing(false);
     }
@@ -249,6 +261,50 @@ const MyResourcesPage = () => {
                 <Loader2 className="animate-spin text-emerald-500" />
                 <span className="font-bold text-sm">Processing batch actions...</span>
              </div>
+          </div>
+        )}
+
+        {/* Custom Bulk Confirm Modal */}
+        {showBulkConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-[#090a0c] w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-8 space-y-6">
+              <div className="flex justify-between items-start">
+                <div className="p-3 bg-rose-50 dark:bg-rose-500/10 rounded-xl text-rose-600">
+                  <Trash2 size={28} />
+                </div>
+                <button 
+                  onClick={() => { setShowBulkConfirm(false); setBulkActionType(null); }} 
+                  className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Delete {selectedIds.length} Resources?</h2>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  You are about to permanently delete <span className="font-bold text-zinc-900 dark:text-zinc-300">{selectedIds.length}</span> resources. This action will wipe all associated files and version history for these items. This cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button 
+                  disabled={isBulkActing}
+                  onClick={() => { setShowBulkConfirm(false); setBulkActionType(null); }}
+                  className="flex-1 py-3.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleBulkAction('delete')}
+                  disabled={isBulkActing}
+                  className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
+                >
+                  {isBulkActing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                  {isBulkActing ? "Deleting..." : "Delete All"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>

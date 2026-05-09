@@ -40,11 +40,6 @@ export const ResourceSettingsForm = ({
   };
 
   const addCollaborator = async (teacher: any) => {
-    if (formData.collaboration_mode === 'none') {
-      toast.error("Collaboration is disabled. Change the collaboration mode to 'Invite Only' to add collaborators.");
-      return;
-    }
-
     if (!collectionId) {
       if (onAddCollaborator) {
         onAddCollaborator(teacher);
@@ -167,10 +162,10 @@ export const ResourceSettingsForm = ({
           </h2>
         </div>
 
-        <div className="space-y-6">
+        <div className={`space-y-6 transition-opacity duration-300 ${formData.collaboration_mode === 'none' ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
           {/* Search box */}
           <div className="relative">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 ${formData.collaboration_mode === 'none' ? 'text-zinc-300 dark:text-zinc-700' : 'text-zinc-400'}`} size={14} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <input
               type="text"
               placeholder={formData.collaboration_mode === 'none' ? "Collaboration is disabled" : "Search teachers by name or username..."}
@@ -178,8 +173,8 @@ export const ResourceSettingsForm = ({
               disabled={formData.collaboration_mode === 'none'}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`w-full border rounded-lg py-2.5 pl-9 pr-4 text-xs focus:outline-none transition-all ${
-                formData.collaboration_mode === 'none' 
-                  ? "bg-zinc-100 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800/40 text-zinc-400 cursor-not-allowed" 
+                formData.collaboration_mode === 'none'
+                  ? "bg-zinc-100 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800/40 text-zinc-400 cursor-not-allowed"
                   : "bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus:ring-1 focus:ring-blue-500/30"
               }`}
             />

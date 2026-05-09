@@ -17,6 +17,7 @@ export interface User {
   role?: string;
   institution?: string;
   bio?: string;
+  auth_provider?: string;
   is_verified: boolean;
   is_admin: boolean;
 }

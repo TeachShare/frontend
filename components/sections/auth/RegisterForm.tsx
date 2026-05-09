@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { api } from "@/lib/axios";
 import { GoogleAuthButton } from "./GoogleAuthButton";
@@ -12,6 +12,8 @@ const toastStyle = {
     background: "var(--toast-bg, #161b22)",
     color: "var(--toast-text, #fff)",
     border: "1px solid var(--toast-border, #30363d)",
+    fontSize: "13px",
+    fontWeight: "500",
   },
   success: {
     iconTheme: { primary: "#238636", secondary: "#fff" },
@@ -33,14 +35,50 @@ export const RegisterForm = ({ onSuccess }: Props) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [strength, setStrength] = useState({
+    score: 0,
+    label: "Very Weak",
+    color: "bg-zinc-200"
+  });
+
+  const calculateStrength = (pass: string) => {
+    let score = 0;
+    if (!pass) return setStrength({ score: 0, label: "Very Weak", color: "bg-zinc-200" });
+    
+    if (pass.length >= 8) score++;
+    if (/[A-Z]/.test(pass)) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+    const labels = ["Very Weak", "Weak", "Fair", "Strong", "Very Strong"];
+    const colors = ["bg-rose-500", "bg-orange-500", "bg-yellow-500", "bg-emerald-500", "bg-emerald-600"];
+
+    setStrength({
+      score: Math.min(score + 1, 5),
+      label: labels[score] || "Very Weak",
+      color: colors[score] || "bg-zinc-200"
+    });
+  };
+
+  const handlePasswordChange = (val: string) => {
+    setPassword(val);
+    calculateStrength(val);
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password || !firstName || !lastName || !username)
-      return toast.error("Please fill in all fields");
+    if (!email || !password || !firstName || !lastName || !username) {
+      return toast.error("Please fill in all fields", { icon: <AlertCircle className="text-rose-500" size={18} /> });
+    }
 
-    if (password !== confirmPassword)
-      return toast.error("Passwords do not match");
+    if (password !== confirmPassword) {
+      return toast.error("Passwords do not match", { icon: <AlertCircle className="text-rose-500" size={18} /> });
+    }
+
+    if (password.length < 8) {
+      return toast.error("Password must be at least 8 characters", { icon: <AlertCircle className="text-rose-500" size={18} /> });
+    }
 
     setLoading(true);
 
@@ -67,15 +105,17 @@ export const RegisterForm = ({ onSuccess }: Props) => {
       const data = await toast.promise(
         registerRequest(),
         {
-          loading: "Creating your account...",
-          success: "Account created! redirecting...",
+          loading: "Creating your workspace...",
+          success: "Account created successfully!",
           error: (err) => `${err.message}`,
         },
         toastStyle,
       );
 
       if (data.verification_token) {
-        router.push(`/verification/${data.verification_token}`);
+        setTimeout(() => {
+          router.push(`/verification/${data.verification_token}`);
+        }, 1000);
       }
 
       if (onSuccess) onSuccess();
@@ -86,18 +126,20 @@ export const RegisterForm = ({ onSuccess }: Props) => {
     }
   };
 
+  const passwordsMatch = password && confirmPassword && password === confirmPassword;
+
   return (
-    <form className="space-y-4" onSubmit={handleRegister}>
+    <form className="space-y-5" onSubmit={handleRegister}>
       {/* First & Last Name */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name */}
         <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide">
+          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
             First name
           </label>
-          <div className="relative">
+          <div className="relative group">
             <User
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
               size={16}
             />
             <input
@@ -105,19 +147,19 @@ export const RegisterForm = ({ onSuccess }: Props) => {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="John"
-              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
+              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
             />
           </div>
         </div>
 
         {/* Last Name */}
         <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide">
+          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
             Last name
           </label>
-          <div className="relative">
+          <div className="relative group">
             <User
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
               size={16}
             />
             <input
@@ -125,7 +167,7 @@ export const RegisterForm = ({ onSuccess }: Props) => {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Doe"
-              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
+              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
             />
           </div>
         </div>
@@ -133,11 +175,11 @@ export const RegisterForm = ({ onSuccess }: Props) => {
 
       {/* Username */}
       <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide">
+        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
           Username
         </label>
-        <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58] text-sm font-bold">
+        <div className="relative group">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 text-sm font-bold transition-colors">
             @
           </div>
           <input
@@ -145,82 +187,106 @@ export const RegisterForm = ({ onSuccess }: Props) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="johndoe"
-            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
+            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
           />
         </div>
       </div>
 
       {/* Email */}
       <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide">
+        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
           Work email
         </label>
-        <div className="relative">
+        <div className="relative group">
           <Mail
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
             size={16}
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="example@school.edu"
-            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
+            placeholder="name@school.edu"
+            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
           />
         </div>
       </div>
 
-      {/* Passwords */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Password */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide">
-            Password
-          </label>
-          <div className="relative">
-            <Lock
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58]"
-              size={16}
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a strong password"
-              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
-            />
-          </div>
+      {/* Password */}
+      <div className="space-y-1.5">
+        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
+          Password
+        </label>
+        <div className="relative group">
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
+            size={16}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => handlePasswordChange(e.target.value)}
+            placeholder="Strong password"
+            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
+          />
         </div>
-
-        {/* Confirm Password */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide">
-            Confirm password
-          </label>
-          <div className="relative">
-            <Lock
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58]"
-              size={16}
-            />
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter password"
-              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
-            />
+        {password && (
+          <div className="space-y-1.5 pt-0.5 px-1">
+            <div className="flex gap-1 h-1">
+              {[...Array(5)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`flex-1 rounded-full transition-all duration-500 ${i < strength.score ? strength.color : 'bg-zinc-200 dark:bg-[#30363d]'}`}
+                />
+              ))}
+            </div>
+            <p className={`text-[9px] font-bold tracking-wide uppercase ${strength.score <= 2 ? 'text-rose-500' : strength.score <= 3 ? 'text-orange-500' : 'text-emerald-500'}`}>
+              {strength.label}
+            </p>
           </div>
+        )}
+      </div>
+
+      {/* Confirm Password */}
+      <div className="space-y-1.5">
+        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
+          Confirm password
+        </label>
+        <div className="relative group">
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
+            size={16}
+          />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Match password"
+            className={`w-full bg-zinc-50 dark:bg-[#0d1117] border rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 transition-all duration-300 ${
+              passwordsMatch 
+                ? "border-emerald-500/50 focus:ring-emerald-500/10" 
+                : confirmPassword && password !== confirmPassword
+                ? "border-rose-500/50 focus:ring-rose-500/10"
+                : "border-zinc-200 dark:border-[#30363d] focus:ring-emerald-500/10 focus:border-emerald-500/50"
+            }`}
+          />
+          {passwordsMatch && (
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-500 animate-in zoom-in duration-300">
+              <CheckCircle2 size={18} />
+            </div>
+          )}
         </div>
       </div>
 
       {/* Terms */}
       <div className="flex items-center justify-between pt-1">
-        <label className="flex items-center gap-2 cursor-pointer group">
+        <label className="flex items-center gap-3 cursor-pointer group">
           <input
             type="checkbox"
-            className="w-4 h-4 rounded border-zinc-300 dark:border-[#30363d] bg-zinc-50 dark:bg-[#0d1117] text-emerald-600 dark:text-[#238636] focus:ring-0"
+            required
+            className="w-4 h-4 rounded border-zinc-300 dark:border-[#30363d] bg-zinc-50 dark:bg-[#0d1117] text-emerald-600 dark:text-[#238636] focus:ring-0 transition-all cursor-pointer"
           />
-          <span className="text-[13px] text-zinc-500 dark:text-[#8b949e] group-hover:text-zinc-900 dark:group-hover:text-[#c9d1d9]">
+          <span className="text-[12px] text-zinc-500 dark:text-[#8b949e] group-hover:text-zinc-900 dark:group-hover:text-[#c9d1d9] transition-colors leading-none">
             I agree to the Terms and Privacy Policy
           </span>
         </label>
@@ -230,7 +296,7 @@ export const RegisterForm = ({ onSuccess }: Props) => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-[#238636] dark:hover:bg-[#2ea043] active:scale-[0.98] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 mt-4 text-sm"
+        className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-[#238636] dark:hover:bg-[#2ea043] active:scale-[0.98] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 dark:shadow-none mt-2 text-sm"
       >
         {loading ? "Processing..." : "Create account"}
       </button>
