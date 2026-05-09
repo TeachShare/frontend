@@ -1,6 +1,7 @@
 import React from "react";
 import { Eye, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 export const ResourceHeader = () => {
   const router = useRouter();
@@ -17,18 +18,23 @@ export const ResourceHeader = () => {
         </p>
       </div>
       <div className="flex items-center space-x-2">
-        <button className="flex items-center space-x-2 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-300">
-          <Eye size={14} className="text-zinc-500" />
-          <span>Saved views</span>
-        </button>
-        <button
-          onClick={() => router.push("/resources/create")}
-          className="flex items-center space-x-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors duration-300"
+        <Button
+          variant="outline"
+          size="sm"
+          leftIcon={<Eye size={14} className="text-zinc-500" />}
         >
-          <Plus size={14} />
-          <span>Upload New</span>
-        </button>
+          Saved views
+        </Button>
+        <Button
+          onClick={() => router.push("/resources/create")}
+          variant="emerald-outline"
+          size="sm"
+          leftIcon={<Plus size={14} />}
+        >
+          Upload New
+        </Button>
       </div>
     </div>
   );
 };
+

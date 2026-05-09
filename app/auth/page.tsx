@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import logo from "@/public/logos/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 import { LoginForm } from "@/components/sections/auth/LoginForm";
 import { RegisterForm } from "@/components/sections/auth/RegisterForm";
@@ -14,6 +14,18 @@ const AuthContent = () => {
   const searchParams = useSearchParams();
 
   const currentView = searchParams.get("view") === "register" ? "register" : "login";
+  const error = searchParams.get("error");
+
+  React.useEffect(() => {
+    if (error) {
+      toast.error(error);
+      // Clean up error from URL
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("error");
+      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [error, searchParams]);
 
   // Update URL when user clicks toggle
   const handleToggle = (newView: "login" | "register") => {

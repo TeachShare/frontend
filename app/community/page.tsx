@@ -6,6 +6,7 @@ import { Attachment, Post } from "@/types/community";
 import { PostCreator } from "@/components/sections/community/PostCreator";
 import { PostItem } from "@/components/sections/community/PostItem";
 import { EducatorCard } from "@/components/sections/community/EducatorCard";
+import { InviteModal } from "@/components/sections/community/InviteModal";
 import { useFeed, useCreatePost } from "@/hooks/useCommunity"; 
 import { useTeachers } from "@/hooks/useTeacher";
 import { SkeletonPostItem, SkeletonEducatorCard } from "@/components/sections/community/CommunitySkeletons";
@@ -14,6 +15,7 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState<'feed' | 'discover'>('feed');
   const [educatorsPage, setEducatorsPage] = useState(1);
   const [allEducators, setAllEducators] = useState<any[]>([]);
+  const [inviteConfig, setInviteConfig] = useState<{id: number, name: string} | null>(null);
   
   const { data: feedData, isLoading: feedLoading, isError: feedError } = useFeed(1);
   const { data: teachersRes, isLoading: teachersLoading, isFetching: teachersFetching } = useTeachers(educatorsPage);
@@ -71,7 +73,7 @@ const Page = () => {
           
           {activeTab === 'feed' ? (
               <>
-                <PostCreator onPublish={handleAddPost} />
+                <PostCreator onPublish={handleAddPost} isPublishing={createPostMutation.isPending} />
                 <div className="space-y-6 pb-20">
                     {feedLoading ? (
                       [...Array(3)].map((_, i) => <SkeletonPostItem key={i} />)
@@ -97,11 +99,10 @@ const Page = () => {
                                 avatar={teacher.profile_image_url}
                                 resources={teacher.stats.resources.toString()}
                                 followers={teacher.stats.followers.toString()}
-                                coTeaching="0" 
-                                alignment={teacher.alignment || 0}
                                 tags={teacher.tags || []}
                                 specialTags={teacher.is_verified ? ["Verified"] : []}
                                 following={teacher.is_following}
+                                onInvite={(id, name) => setInviteConfig({ id, name })}
                             />
                         ))
                     ) : !teachersLoading && (
@@ -131,6 +132,13 @@ const Page = () => {
               </div>
           )}
         </div>
+
+        <InviteModal 
+          isOpen={!!inviteConfig}
+          onClose={() => setInviteConfig(null)}
+          teacherId={inviteConfig?.id || 0}
+          teacherName={inviteConfig?.name || ""}
+        />
       </main>
     </Layout>
   );

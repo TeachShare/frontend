@@ -5,9 +5,10 @@ import { ViewMode } from "@/types/generator";
 interface Props {
   activeView: ViewMode;
   setActiveView: (view: ViewMode) => void;
+  resultsCount?: number;
 }
 
-export const GeneratorHeader = ({ activeView, setActiveView }: Props) => {
+export const GeneratorHeader = ({ activeView, setActiveView, resultsCount = 0 }: Props) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div className="max-w-xl">
@@ -38,7 +39,7 @@ export const GeneratorHeader = ({ activeView, setActiveView }: Props) => {
               : "text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"
           }`}
         >
-          <Sparkles size={14} /> My Generated (2)
+          <Sparkles size={14} /> My Generated ({resultsCount})
         </button>
       </div>
     </div>

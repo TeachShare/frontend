@@ -32,10 +32,10 @@ export const VersionCard = ({
   });
 
   const handleCompare = () => {
-    // Navigate to /resources/[id]/history/compare?with=[snapshot_id]
-    // This allows the compare page to load both the current ID and the snapshot ID
+    // Navigate to /resources/[id]/history/compare?with=[version_no]
+    // Use the version number for cleaner URLs as per user request
     router.push(
-      `/resources/${resourceSlug}/history/compare?with=${v.collection_id}`,
+      `/resources/${resourceSlug}/history/compare?with=${v.version_no}`,
     );
   };
 
@@ -66,8 +66,8 @@ export const VersionCard = ({
             <span
               className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-widest ${
                 isLatest
-                  ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                  : "bg-zinc-100 text-zinc-500 border-zinc-200"
+                  ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
               }`}
             >
               {isLatest ? "Active" : "Immutable"}
@@ -105,7 +105,12 @@ export const VersionCard = ({
             {/* Compare Button now dynamic for any version */}
             <button
               onClick={handleCompare}
-              className="bg-blue-600 text-white py-2 rounded font-bold text-[11px] hover:bg-blue-700 flex items-center justify-center gap-2 transition-all"
+              disabled={isLatest}
+              className={`py-2 rounded font-bold text-[11px] flex items-center justify-center gap-2 transition-all ${
+                isLatest 
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed" 
+                  : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+              }`}
             >
               <ArrowRightLeft size={12} /> Compare
             </button>

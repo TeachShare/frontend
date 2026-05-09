@@ -1,6 +1,7 @@
 // types/community.ts
 export interface Educator {
   id: number;
+  username?: string;
   name: string;
   role: string;
   avatar: string;
@@ -39,6 +40,7 @@ export interface Comment {
 }
 export interface Author {
   id: number;
+  username?: string;
   name: string;
   avatar: string | null;
   role?: string; // Optional if your backend sends it

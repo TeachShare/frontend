@@ -1,40 +1,46 @@
 "use client";
 import React from "react";
-import { Plus, Check, Mail } from "lucide-react";
+import { Plus, Check, Mail, Users } from "lucide-react";
 import { Educator } from "@/types/community";
 import Link from "next/link";
+import { getAvatarUrl } from "@/lib/utils";
 
 import { useToggleFollow } from "@/hooks/useTeacher";
 
+interface EducatorCardProps extends Educator {
+    onInvite?: (id: number, name: string) => void;
+}
+
 export const EducatorCard = ({
   id,
+  username,
   name,
   role,
   avatar,
   resources,
   followers,
-  coTeaching,
-  alignment,
   tags,
   specialTags,
   following = false,
-}: Educator) => {
+  onInvite
+}: EducatorCardProps) => {
   const toggleFollow = useToggleFollow();
+  const profileLink = `/profile/${username || id}`;
 
   return (
     <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all flex flex-col justify-between group duration-300">
       <div>
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center space-x-3">
-            <Link href={`/profile/${id}`}>
+            <Link href={profileLink}>
                 <img
-                src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`}
+                src={getAvatarUrl(avatar, name, id, 'avataaars')}
                 alt={name}
                 className="w-12 h-12 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 transition-colors duration-300 cursor-pointer"
                 />
             </Link>
             <div>
-              <Link href={`/profile/${id}`}>
+              <Link href={profileLink}>
                 <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 cursor-pointer">
                     {name}
                 </h4>
@@ -84,7 +90,7 @@ export const EducatorCard = ({
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-5">
+        <div className="grid grid-cols-2 gap-2 mb-5">
           <div className="text-center bg-zinc-50 dark:bg-zinc-900/40 rounded-lg py-2 transition-colors duration-300">
             <p className="text-[10px] text-zinc-500 dark:text-zinc-600 uppercase font-bold tracking-tighter transition-colors duration-300">
               Resources
@@ -96,29 +102,6 @@ export const EducatorCard = ({
               Followers
             </p>
             <p className="text-xs font-bold text-zinc-900 dark:text-zinc-300 transition-colors duration-300">{followers}</p>
-          </div>
-          <div className="text-center bg-zinc-50 dark:bg-zinc-900/40 rounded-lg py-2 transition-colors duration-300">
-            <p className="text-[10px] text-zinc-500 dark:text-zinc-600 uppercase font-bold tracking-tighter transition-colors duration-300">
-              Co-teaching
-            </p>
-            <p className="text-xs font-bold text-zinc-900 dark:text-zinc-300 transition-colors duration-300">{coTeaching}</p>
-          </div>
-        </div>
-
-        <div className="mb-5">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-600 uppercase transition-colors duration-300">
-              Follow alignment
-            </span>
-            <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 transition-colors duration-300">
-              {alignment}% match
-            </span>
-          </div>
-          <div className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-900 rounded-full overflow-hidden transition-colors duration-300">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full"
-              style={{ width: `${alignment}%` }}
-            ></div>
           </div>
         </div>
 
@@ -136,19 +119,22 @@ export const EducatorCard = ({
 
       <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800/50 transition-colors duration-300">
         <div className="flex items-center gap-3">
-            <Link href={`/profile/${id}`}>
+            <Link href={profileLink}>
                 <button className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors duration-300">
                     View profile
                 </button>
             </Link>
-            <Link href={`/profile/${id}?message=true`}>
+            <Link href={`${profileLink}?message=true`}>
                 <button className="text-[11px] font-bold text-zinc-500 dark:text-zinc-500 hover:text-emerald-500 transition-colors duration-300 flex items-center gap-1">
                     <Mail size={12} /> Message
                 </button>
             </Link>
         </div>
-        <button className="text-[11px] font-bold text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors duration-300">
-          Invite to collaborate
+        <button 
+          onClick={() => onInvite?.(id, name)}
+          className="text-[11px] font-bold text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors duration-300 flex items-center gap-1.5"
+        >
+          <Users size={12} /> Invite to collaborate
         </button>
       </div>
     </div>

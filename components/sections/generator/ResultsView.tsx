@@ -60,22 +60,6 @@ export const ResultsView = ({ onGenerateMore }: Props) => {
           </div>
         )}
       </div>
-
-      <div className="bg-zinc-50 dark:bg-zinc-900/30 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800/60 border-dashed text-center transition-colors duration-300">
-        <div className="w-12 h-12 bg-zinc-200 dark:bg-zinc-800/50 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
-          <Plus
-            size={24}
-            className="text-zinc-500 dark:text-zinc-600 transition-colors duration-300"
-          />
-        </div>
-        <h4 className="text-zinc-700 dark:text-zinc-400 font-bold transition-colors duration-300">
-          Need something else?
-        </h4>
-        <p className="text-zinc-500 dark:text-zinc-600 text-sm mt-1 max-w-sm mx-auto transition-colors duration-300">
-          Use the AI Generator to create more custom resources for your classes
-          in seconds.
-        </p>
-      </div>
     </div>
   );
 };

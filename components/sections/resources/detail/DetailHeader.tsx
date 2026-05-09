@@ -1,28 +1,23 @@
 "use client";
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Share2, History, Edit3, ArrowLeft, Loader2 } from 'lucide-react';
-import { useUser } from '@/hooks/useUser';
+import { Share2, History, Edit3, ArrowLeft, Globe, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
-export const DetailHeader = ({ resource }: { resource: any }) => {
+interface Props {
+  resource: any;
+  isOwner?: boolean;
+  canEdit?: boolean;
+  isPublishing?: boolean;
+  onPublish?: () => void;
+  onDelete?: () => void;
+  isDeleting?: boolean;
+}
+
+export const DetailHeader = ({ resource, isOwner = false, canEdit = false, isPublishing = false, onPublish, onDelete, isDeleting = false }: Props) => {
   const router = useRouter();
 
-  // Fetching current teacher info from your custom hook
-  const { data: user, isLoading, isError }: any = useUser();
-  
-  console.log(resource, user)
-  // 1. Safety Check: If we are still fetching the user, show a small loader or placeholder
-  // This prevents "Cannot read property teacher_id of undefined"
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-end h-8">
-        <Loader2 className="animate-spin text-zinc-400" size={14} />
-      </div>
-    );
-  }
-
-  // 2. Ownership Logic: Check if current teacher matches resource creator
-  const isOwner = user && resource.owner_id === user.id;
+  const isDraft = !resource.is_published;
 
   const handleEdit = () => {
     const slug = `${resource.collection_id}-${resource.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
@@ -44,30 +39,53 @@ export const DetailHeader = ({ resource }: { resource: any }) => {
           <ArrowLeft size={12}/> Back
         </button>
         <span>/</span>
-        <span className="text-zinc-900 dark:text-zinc-300 transition-colors duration-300">View Resource</span>
+        <span className="text-zinc-900 dark:text-zinc-300 transition-colors duration-300">
+            {isDraft ? "Draft View" : "View Resource"}
+        </span>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Share is visible to everyone */}
-        <button className="flex items-center gap-1.5 hover:text-zinc-900 dark:hover:text-white transition-colors duration-300">
-          <Share2 size={14}/> Share
-        </button>
+        <Button variant="ghost" size="sm" leftIcon={<Share2 size={14}/>}>
+          Share
+        </Button>
 
-        {/* 3. Conditional Rendering based on ownership */}
-        {isOwner && (
+        {/* Conditional Rendering based on permissions */}
+        {(isOwner || canEdit) && (
           <>
-            <button 
-              onClick={handleVersionHistory} 
-              className="flex items-center gap-1.5 hover:text-zinc-900 dark:hover:text-white transition-colors duration-300"
-            >
-              <History size={14}/> Version History
-            </button>
-            <button 
-              onClick={handleEdit} 
-              className="bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400 px-3 py-1.5 rounded flex items-center gap-1.5 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 transition-all duration-300"
-            >
-              <Edit3 size={14}/> Edit Resource
-            </button>
+            <Button variant="ghost" size="sm" onClick={handleVersionHistory} leftIcon={<History size={14}/>}>
+              History
+            </Button>
+            
+            <Button variant="outline" size="sm" onClick={handleEdit} leftIcon={<Edit3 size={14}/>}>
+              Edit
+            </Button>
+
+            {isOwner && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onDelete} 
+                isLoading={isDeleting}
+                leftIcon={<Trash2 size={14}/>}
+                className="text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+              >
+                Delete
+              </Button>
+            )}
+
+            {isDraft && (
+              <Button 
+                variant="emerald" 
+                size="sm" 
+                onClick={onPublish} 
+                isLoading={isPublishing}
+                leftIcon={<Globe size={14}/>}
+                className="shadow-emerald-500/10"
+              >
+                Publish Now
+              </Button>
+            )}
           </>
         )}
       </div>

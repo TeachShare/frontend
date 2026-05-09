@@ -7,9 +7,12 @@ import { api } from "@/lib/axios";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 
+import { ShieldCheck, TrendingUp } from "lucide-react";
+
 // Hooks & Components
 import { useMetadata } from "@/hooks/useMetadata"; 
 import { RemixModal } from "@/components/sections/repository/RemixModal";
+import { QuickPreviewModal } from "@/components/sections/repository/QuickPreviewModal";
 import { RepositoryItemCard } from "@/components/sections/repository/RepositoryItemCard";
 import { FilterGroup } from "@/components/sections/repository/FilterGroup";
 import { SkeletonRepositoryCard } from "@/components/sections/repository/RepositorySkeletons";
@@ -25,6 +28,7 @@ const RepositoryPage = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [isRemixing, setIsRemixing] = useState(false);
   const [remixItem, setRemixItem] = useState<any | null>(null);
+  const [previewItem, setPreviewItem] = useState<any | null>(null);
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -33,16 +37,20 @@ const RepositoryPage = () => {
     query: "",
     subject_id: "",
     grade_level_id: "",
-    content_type_id: ""
+    content_type_id: "",
+    sort_by: "newest",
+    verified_only: false
   });
 
-  const fetchDiscoveryData = async (currentPage: number, currentFilters: typeof filters) => {
+  const fetchDiscoveryData = React.useCallback(async (currentPage: number, currentFilters: typeof filters) => {
     try {
       if (currentPage === 1) setIsLoading(true);
       else setIsFetching(true);
 
       const params = new URLSearchParams();
       params.append('page', currentPage.toString());
+      params.append('sort_by', currentFilters.sort_by);
+      if (currentFilters.verified_only) params.append('verified_only', 'true');
       if (currentFilters.query) params.append('search', currentFilters.query);
       if (currentFilters.subject_id) params.append('subject_id', currentFilters.subject_id);
       if (currentFilters.grade_level_id) params.append('grade_level_id', currentFilters.grade_level_id);
@@ -69,7 +77,7 @@ const RepositoryPage = () => {
       setIsLoading(false);
       setIsFetching(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     setPage(1);
@@ -80,10 +88,18 @@ const RepositoryPage = () => {
       fetchDiscoveryData(page, filters);
     }, filters.query ? 400 : 0);
     return () => clearTimeout(timer);
-  }, [page, filters]);
+  }, [page, filters, fetchDiscoveryData]);
 
   const handleConfirmRemix = async () => {
     if (!remixItem || !remixItem.collection_id) return;
+    
+    // Safety check: ensure remixing is allowed
+    if (!remixItem.allow_remixing) {
+      alert("Remixing is disabled for this resource.");
+      setRemixItem(null);
+      return;
+    }
+
     try {
       setIsRemixing(true);
       const response = await api.post(`/resource_collection/remix/${remixItem.collection_id}`);
@@ -139,40 +155,64 @@ const RepositoryPage = () => {
         <div className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6 max-w-[1600px] mx-auto w-full">
           
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#1F2226] pb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200 dark:border-[#1F2226] pb-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-black text-white tracking-tight uppercase">Resource Repository</h1>
+                <h1 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight uppercase">Resource Repository</h1>
               </div>
               <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Accessing Global Community Ledger</p>
             </div>
             
             <div className="flex items-center gap-6">
               <div className="text-right">
-                <p className="text-lg font-black text-white leading-none">4.7</p>
-                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-tighter">Avg Rating</p>
+                <p className="text-lg font-black text-zinc-900 dark:text-white leading-none">4.7</p>
+                <p className="text-[9px] font-bold text-zinc-500 dark:text-zinc-600 uppercase tracking-tighter">Avg Rating</p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-black text-white leading-none">{totalCount}</p>
-                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-tighter">Snapshots</p>
+                <p className="text-lg font-black text-zinc-900 dark:text-white leading-none">{totalCount}</p>
+                <p className="text-[9px] font-bold text-zinc-500 dark:text-zinc-600 uppercase tracking-tighter">Snapshots</p>
               </div>
             </div>
           </div>
 
           {/* Sticky Filter Pipeline */}
-          <div className="bg-[#0D0F12]/80 backdrop-blur-xl border border-[#1F2226] rounded-xl p-4 flex flex-wrap items-center gap-4 shadow-2xl sticky top-0 z-10">
-            <div className="relative flex-1 min-w-[300px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={14} />
+          <div className="bg-white/80 dark:bg-[#0D0F12]/80 backdrop-blur-xl border border-zinc-200 dark:border-[#1F2226] rounded-2xl p-4 flex flex-wrap items-center gap-4 shadow-2xl sticky top-4 z-40">
+            <div className="relative flex-1 min-w-[240px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600" size={15} />
               <input
                 type="text"
                 placeholder="Search community ledger..."
                 value={filters.query}
                 onChange={(e) => setFilters({ ...filters, query: e.target.value })}
-                className="w-full bg-[#050505] border border-[#1F2226] rounded-md pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-zinc-700 font-medium"
+                className="w-full bg-zinc-50 dark:bg-[#050505] border border-zinc-200 dark:border-[#1F2226] rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-700 font-medium"
               />
             </div>
 
-           <div className="flex flex-wrap gap-3">
+           <div className="flex flex-wrap items-center gap-3">
+              {/* Toggles */}
+              <div className="flex items-center gap-2 pr-2 border-r border-zinc-100 dark:border-zinc-800">
+                  <button 
+                    onClick={() => setFilters(f => ({...f, sort_by: f.sort_by === 'trending' ? 'newest' : 'trending'}))}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        filters.sort_by === 'trending' 
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+                        : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    <TrendingUp size={14} /> Trending
+                  </button>
+                  <button 
+                    onClick={() => setFilters(f => ({...f, verified_only: !f.verified_only}))}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        filters.verified_only 
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                        : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    <ShieldCheck size={14} /> Verified
+                  </button>
+              </div>
+
               <FilterGroup 
                 label="Subject" 
                 value={metadata?.subjects?.find((s: any) => s.id.toString() === filters.subject_id)?.name || "All Subjects"} 
@@ -221,12 +261,13 @@ const RepositoryPage = () => {
                         data={resource}
                         onDownload={() => handleDownload(resource.collection_id)}
                         onRemix={() => setRemixItem(resource)}
+                        onPreview={(res: any) => setPreviewItem(res)}
                     />
                 ))}
                 </div>
             ) : (
-                <div className="py-20 text-center border border-dashed border-[#1F2226] rounded-xl">
-                    <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">No resources found</p>
+                <div className="py-20 text-center border border-dashed border-zinc-200 dark:border-[#1F2226] rounded-xl">
+                    <p className="text-xs font-bold text-zinc-500 dark:text-zinc-600 uppercase tracking-widest">No resources found</p>
                 </div>
             )}
 
@@ -235,7 +276,7 @@ const RepositoryPage = () => {
                     <button 
                         onClick={() => setPage(prev => prev + 1)}
                         disabled={isFetching}
-                        className="bg-[#121417] border border-[#1F2226] px-10 py-3 rounded-xl text-sm font-bold text-zinc-400 hover:border-emerald-500/50 hover:text-emerald-500 transition-all disabled:opacity-50 flex items-center gap-2"
+                        className="bg-zinc-100 dark:bg-[#121417] border border-zinc-200 dark:border-[#1F2226] px-10 py-3 rounded-xl text-sm font-bold text-zinc-600 dark:text-zinc-400 hover:border-emerald-500/50 hover:text-emerald-500 transition-all disabled:opacity-50 flex items-center gap-2"
                     >
                         {isFetching && <Loader2 size={16} className="animate-spin" />}
                         {isFetching ? "Syncing..." : "Load More Discoveries"}
@@ -244,6 +285,17 @@ const RepositoryPage = () => {
             )}
           </div>
         </div>
+
+        <QuickPreviewModal 
+            isOpen={!!previewItem}
+            onClose={() => setPreviewItem(null)}
+            resource={previewItem}
+            onDownload={() => previewItem && handleDownload(previewItem.collection_id)}
+            onRemix={() => {
+                setRemixItem(previewItem);
+                setPreviewItem(null);
+            }}
+        />
       </main>
     </Layout>
   );

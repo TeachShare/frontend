@@ -1,8 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import { CornerDownRight } from "lucide-react";
+import { CornerDownRight, Flag } from "lucide-react";
 import { Comment } from "@/types/community";
 import Image from "next/image";
+import { getAvatarUrl } from "@/lib/utils";
+import { ReportModal } from "../resources/detail/ReportModal";
 
 interface CommentItemProps {
   comment: Comment;
@@ -13,6 +15,7 @@ interface CommentItemProps {
 export const CommentItem = ({ comment, depth = 0, onReply }: CommentItemProps) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const handleSubmitReply = () => {
     if (!replyText.trim()) return;
@@ -28,7 +31,13 @@ export const CommentItem = ({ comment, depth = 0, onReply }: CommentItemProps) =
       <div className="flex gap-3">
         {/* ✅ FIXED: Now uses comment.author.avatar */}
         <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-sm shadow-sm">
-         <Image src={comment.author.avatar || ""}  width={10} height={10} alt={comment.author.name} className="w-[100%] h-full rounded-lg"/>
+         <Image 
+            src={getAvatarUrl(comment.author.avatar, comment.author.name, comment.author.id)}  
+            width={32} 
+            height={32} 
+            alt={comment.author.name} 
+            className="w-full h-full rounded-lg object-cover"
+          />
         </div>
         
         <div className="flex-1">
@@ -53,6 +62,12 @@ export const CommentItem = ({ comment, depth = 0, onReply }: CommentItemProps) =
               className="text-[9px] font-black text-zinc-400 hover:text-emerald-500 uppercase tracking-widest transition-colors flex items-center gap-1"
             >
               <CornerDownRight size={10} /> {isReplying ? "Cancel" : "Reply"}
+            </button>
+            <button 
+              onClick={() => setIsReportModalOpen(true)}
+              className="text-[9px] font-black text-zinc-400 hover:text-rose-500 uppercase tracking-widest transition-colors flex items-center gap-1"
+            >
+              <Flag size={10} /> Report
             </button>
           </div>
 
@@ -82,6 +97,13 @@ export const CommentItem = ({ comment, depth = 0, onReply }: CommentItemProps) =
       {comment.replies && comment.replies.map((reply) => (
         <CommentItem key={reply.id} comment={reply} depth={depth + 1} onReply={onReply} />
       ))}
+
+      <ReportModal 
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetId={Number(comment.id)}
+        targetType="post_comment"
+      />
     </div>
   );
 };

@@ -34,7 +34,8 @@ export const useSocket = () => {
     if (!user?.id) return;
 
     // Connect to Socket.io server
-    const socket = io("http://localhost:5000", {
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1", "") || "http://localhost:5000";
+    const socket = io(socketUrl, {
         withCredentials: true
     });
     socketRef.current = socket;

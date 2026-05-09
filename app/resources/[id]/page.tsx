@@ -4,6 +4,31 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import { api } from "@/lib/axios";
+import { useUser } from "@/hooks/useUser";
+import { toast } from "react-hot-toast";
+
+const TOAST_STYLE = {
+  style: {
+    minWidth: "280px",
+    fontSize: "11px",
+    fontWeight: "bold",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.05em",
+    borderRadius: "12px",
+    background: "#090a0c",
+    color: "#fff",
+    border: "1px solid #27272a",
+    padding: "12px 16px",
+  },
+  success: {
+    duration: 4000,
+    iconTheme: { primary: "#10b981", secondary: "#fff" },
+  },
+  error: {
+    duration: 5000,
+    iconTheme: { primary: "#f43f5e", secondary: "#fff" },
+  },
+};
 
 // Sections
 import { DetailHeader } from "@/components/sections/resources/detail/DetailHeader";
@@ -18,10 +43,15 @@ const ResourceDetailView = () => {
   const { id } = useParams();
   const router = useRouter();
 
+  // User State
+  const { data: user, isLoading: isUserLoading } = useUser();
+
   // Core States
   const [resource, setResource] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Social States
   const [isLiked, setIsLiked] = useState(false);
@@ -37,8 +67,23 @@ const ResourceDetailView = () => {
 
     const fetchResourceDetails = async () => {
       try {
-        const collectionId = (id as string).split("-")[0];
-        const response = await api.get(`/resource_collection/${collectionId}`);
+        const idStr = id as string;
+        const collectionId = idStr.split("-")[0];
+        
+        // Detect version_no from slug like "10-v1"
+        let version_no = null;
+        if (idStr.includes("-v")) {
+           const parts = idStr.split("-v");
+           if (parts.length > 1) {
+              version_no = parts[1];
+           }
+        }
+
+        const url = version_no 
+          ? `/resource_collection/${collectionId}?version_no=${version_no}`
+          : `/resource_collection/${collectionId}`;
+
+        const response = await api.get(url);
         
         if (response.data.success) {
           const data = response.data.data;
@@ -96,8 +141,6 @@ const ResourceDetailView = () => {
       setIsRemixing(true);
       const collectionId = (id as string).split("-")[0];
       
-      // We pass should_publish: false so the user can edit their remix 
-      // in the creator before it goes live on the community repo
       const response = await api.post(`/resource_collection/remix/${collectionId}`, {
         should_publish: false 
       });
@@ -106,7 +149,6 @@ const ResourceDetailView = () => {
         const newId = response.data.collection_id;
         const cleanTitle = resource.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         
-        // Redirect to the edit mode of the new collection
         router.push(`/resources/create?edit=${newId}-${cleanTitle}`);
       }
     } catch (err) {
@@ -118,7 +160,63 @@ const ResourceDetailView = () => {
     }
   };
 
-  if (isLoading) {
+  const handlePublish = async () => {
+    if (!resource) return;
+    try {
+      setIsPublishing(true);
+      
+      const submitData = new FormData();
+      const payload = {
+        title: resource.title,
+        is_published: true,
+        notes: "Published from detail view"
+      };
+      submitData.append("resource_data", JSON.stringify(payload));
+
+      const collectionId = (id as string).split("-")[0];
+      const response = await api.put(`/resource_collection/${collectionId}`, submitData);
+      
+      if (response.data.success) {
+        toast.success("RESOURCE PUBLISHED: Your resource is now live.", TOAST_STYLE);
+        setResource({ ...resource, is_published: true });
+      }
+    } catch (err: any) {
+      console.error("Publish error:", err);
+      toast.error(`ERROR: ${err.response?.data?.error || "Failed to publish"}`, TOAST_STYLE);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleDeleteResource = async () => {
+    if (!resource || !id) return;
+
+    const collectionId = (id as string).split("-")[0];
+    const confirmDelete = window.confirm("PERMANENT ACTION: Are you sure you want to wipe this resource and all its version history permanently?");
+    
+    if (!confirmDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const response = await api.delete(`/resource_collection/${collectionId}`);
+      
+      if (response.data.success) {
+        toast.success("RESOURCE DELETED: Resource removed from your repository.", TOAST_STYLE);
+        router.push("/repository");
+      }
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast.error(`ERROR: ${err.response?.data?.error || "Failed to delete resource"}`, TOAST_STYLE);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const isOwner = user && resource?.owner_id === user.id;
+  const isCollaborator = user && resource?.collaborators?.some((c: any) => c.teacher_id === user.id && c.role === 'editor');
+  const canEdit = isOwner || isCollaborator;
+
+  if (isLoading || isUserLoading) {
     return (
       <Layout>
         <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] min-h-screen overflow-y-auto">
@@ -143,7 +241,6 @@ const ResourceDetailView = () => {
     <Layout>
       <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] min-h-screen overflow-y-auto transition-colors duration-300">
         
-        {/* REMIX MODAL INTEGRATION */}
         <RemixModal 
           isOpen={isRemixModalOpen}
           onClose={() => setIsRemixModalOpen(false)}
@@ -153,7 +250,15 @@ const ResourceDetailView = () => {
         />
 
         <div className="max-w-7xl mx-auto p-6 space-y-6">
-          <DetailHeader resource={resource} />
+          <DetailHeader 
+            resource={resource} 
+            isOwner={isOwner}
+            canEdit={canEdit}
+            isPublishing={isPublishing}
+            onPublish={handlePublish}
+            onDelete={handleDeleteResource}
+            isDeleting={isDeleting}
+          />
           <DetailHero resource={resource} />
 
           <div className="grid grid-cols-12 gap-8">
@@ -171,8 +276,13 @@ const ResourceDetailView = () => {
                 likesCount={likesCount}
                 isLiked={isLiked}
                 onLike={handleLikeToggle}
-                // TRIGGER: Opens the modal from the sidebar button
-                onRemix={() =>  (true)} 
+                onRemix={() => setIsRemixModalOpen(true)} 
+                isOwner={isOwner}
+                canEdit={canEdit}
+                isPublishing={isPublishing}
+                onPublish={handlePublish}
+                onDelete={handleDeleteResource}
+                isDeleting={isDeleting}
               />
             </div>
           </div>

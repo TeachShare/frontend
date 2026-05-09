@@ -8,6 +8,7 @@ export interface TeacherInfo {
 
 export interface User {
   id: number;
+  username: string;
   email: string;
   first_name: string;
   last_name: string;
@@ -16,11 +17,13 @@ export interface User {
   institution?: string;
   bio?: string;
   is_verified: boolean;
+  is_admin: boolean;
 }
 
 // 2. We explicitly tell the function that it will return a Promise containing our User
 const fetchCurrentUser = async (): Promise<User> => {
-  const response = await fetch("http://localhost:5000/api/v1/auth/me", {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+  const response = await fetch(`${apiUrl}/auth/me`, {
     method: "GET",
     credentials: "include",
   });

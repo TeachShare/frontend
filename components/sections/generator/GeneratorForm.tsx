@@ -23,9 +23,17 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
   const { data: metadata, isLoading: isMetadataLoading } = useMetadata();
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const [subject, setSubject] = useState<string>("Mathematics");
-  const [grade, setGrade] = useState<string>("Grade 10");
+  const [subject, setSubject] = useState<string>("");
+  const [grade, setGrade] = useState<string>("");
   const [objectives, setObjectives] = useState<string>("");
+
+  // Sync with metadata when it loads
+  React.useEffect(() => {
+    if (metadata) {
+       if (!subject && metadata.subjects?.length > 0) setSubject(metadata.subjects[0].name);
+       if (!grade && metadata.grade_levels?.length > 0) setGrade(metadata.grade_levels[0].name);
+    }
+  }, [metadata, subject, grade]);
 
   const handleGenerate = async () => {
     if (!objectives || !subject || !grade) {

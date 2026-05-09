@@ -28,12 +28,6 @@ const Page = () => {
 
   const myResources = myResourcesResponse?.resources || [];
   const communityPosts = feedData?.posts || [];
-  
-  // Calculate Stats fallback if stats hook fails or is loading
-  const totalResources = stats?.total_resources ?? myResources.length;
-  const totalLikes = stats?.total_likes ?? 0;
-  const publishedCount = stats?.published_count ?? myResources.filter((res: any) => res.is_published).length;
-  const draftCount = stats?.draft_count ?? (totalResources - publishedCount);
 
   return (
     <Layout>
@@ -53,7 +47,7 @@ const Page = () => {
                   lastName={user?.last_name} 
                   role={user?.role} 
                   institution={user?.institution} 
-                  resourcesCount={totalResources}
+                  resourcesCount={stats?.total_resources || 0}
                 /> 
               )}
               
@@ -67,10 +61,20 @@ const Page = () => {
                   </>
                 ) : (
                   <>
-                    <StatCard title="Resources shared" value={totalResources.toString()} subtext="All-time uploads" trend={totalResources > 0 ? `+${totalResources}` : "0"} />
-                    <StatCard title="Total likes" value={totalLikes >= 1000 ? `${(totalLikes/1000).toFixed(1)}k` : totalLikes.toString()} subtext="Across all resources" trend="+0" />
-                    <StatCard title="Published" value={publishedCount.toString()} subtext="Live in repository" badge="Active" />
-                    <StatCard title="Drafts" value={draftCount.toString()} subtext="Waiting for polish" />
+                    <StatCard 
+                        title="Resources shared" 
+                        value={stats?.total_resources.toString() || "0"} 
+                        subtext="All-time uploads" 
+                        trend={stats?.weekly_resources > 0 ? `+${stats.weekly_resources}` : "0"} 
+                    />
+                    <StatCard 
+                        title="Total likes" 
+                        value={stats?.total_likes >= 1000 ? `${(stats.total_likes/1000).toFixed(1)}k` : (stats?.total_likes.toString() || "0")} 
+                        subtext="Across all resources" 
+                        trend={stats?.weekly_likes > 0 ? `+${stats.weekly_likes}` : "0"} 
+                    />
+                    <StatCard title="Published" value={stats?.published_count.toString() || "0"} subtext="Live in repository" badge="Active" />
+                    <StatCard title="Drafts" value={stats?.draft_count.toString() || "0"} subtext="Waiting for polish" />
                   </>
                 )}
               </div>

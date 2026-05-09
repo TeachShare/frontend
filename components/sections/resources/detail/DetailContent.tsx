@@ -15,14 +15,14 @@ export const DetailContent = ({ resource }: Props) => {
             Resource metadata & description
           </h2>
           <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-xs transition-colors duration-300">
-            <History size={14} /> <span>Version B · Active</span>{" "}
+            <History size={14} /> <span>Version {resource.version_no} · {resource.is_latest ? "Active" : "Archive"}</span>{" "}
             <ChevronDown size={14} />
           </div>
         </div>
 
         <div className="grid grid-cols-4 gap-6 mb-8 text-[11px]">
           <div>
-            <p className="text-zinc-500 dark:text-zinc-600 font-bold uppercase mb-1 transition-colors duration-300">
+            <p className="text-zinc-500 dark:text-zinc-500 font-bold uppercase mb-1 transition-colors duration-300">
               Subject
             </p>
             <p className="text-zinc-900 dark:text-zinc-300 font-medium transition-colors duration-300">
@@ -30,7 +30,7 @@ export const DetailContent = ({ resource }: Props) => {
             </p>
           </div>
           <div>
-            <p className="text-zinc-500 dark:text-zinc-600 font-bold uppercase mb-1 transition-colors duration-300">
+            <p className="text-zinc-500 dark:text-zinc-500 font-bold uppercase mb-1 transition-colors duration-300">
               Grade level
             </p>
             <p className="text-zinc-900 dark:text-zinc-300 font-medium transition-colors duration-300">
@@ -38,7 +38,7 @@ export const DetailContent = ({ resource }: Props) => {
             </p>
           </div>
           <div>
-            <p className="text-zinc-500 dark:text-zinc-600 font-bold uppercase mb-1 transition-colors duration-300">
+            <p className="text-zinc-500 dark:text-zinc-500 font-bold uppercase mb-1 transition-colors duration-300">
               Resource type
             </p>
             <p className="text-zinc-900 dark:text-zinc-300 font-medium transition-colors duration-300">
@@ -46,11 +46,11 @@ export const DetailContent = ({ resource }: Props) => {
             </p>
           </div>
           <div>
-            <p className="text-zinc-500 dark:text-zinc-600 font-bold uppercase mb-1 transition-colors duration-300">
+            <p className="text-zinc-500 dark:text-zinc-500 font-bold uppercase mb-1 transition-colors duration-300">
               Duration
             </p>
             <p className="text-zinc-900 dark:text-zinc-300 font-medium transition-colors duration-300">
-              3-4 class sessions
+              {resource.estimate_duration || "Not specified"}
             </p>
           </div>
         </div>
@@ -67,6 +67,17 @@ export const DetailContent = ({ resource }: Props) => {
         </div>
 
         <div className="space-y-8">
+          {resource.student_summary && (
+            <div className="bg-emerald-50/30 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 rounded-2xl p-6 transition-colors duration-300">
+               <h3 className="text-emerald-700 dark:text-emerald-400 font-bold text-xs mb-3 uppercase tracking-widest transition-colors duration-300">
+                Student-facing summary
+              </h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 italic leading-relaxed transition-colors duration-300">
+                &quot;{resource.student_summary}&quot;
+              </p>
+            </div>
+          )}
+
           <div>
             <h3 className="text-zinc-900 dark:text-white font-bold text-sm mb-3 uppercase tracking-wide transition-colors duration-300">
               Overview

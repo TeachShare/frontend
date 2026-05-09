@@ -1,13 +1,29 @@
 "use client"
 import React from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
   onPublish: () => void;
   onSaveDraft: () => void;
+  isEdit?: boolean;
+  isSaving?: boolean;
+  visibility?: string;
+  isPublished?: boolean;
+  studentSummary?: string;
+  setFormData: React.Dispatch<React.SetStateAction<any>>;
 }
 
-export const PublishSidebar = ({ onPublish, onSaveDraft }: Props) => {
+export const PublishSidebar = ({ 
+  onPublish, 
+  onSaveDraft, 
+  isEdit = false, 
+  isSaving = false,
+  visibility = "public",
+  isPublished = false,
+  studentSummary = "",
+  setFormData
+}: Props) => {
   const router = useRouter();
 
   return (
@@ -30,24 +46,24 @@ export const PublishSidebar = ({ onPublish, onSaveDraft }: Props) => {
           <span className="text-zinc-500 dark:text-zinc-500 font-medium">
             Status
           </span>
-          <span className="text-zinc-900 dark:text-zinc-300 font-bold transition-colors duration-300">
-            Draft
+          <span className={`font-bold transition-colors duration-300 ${isPublished ? "text-emerald-500" : "text-zinc-400"}`}>
+            {isPublished ? "Live" : "Draft"}
           </span>
         </div>
         <div className="p-4 flex justify-between">
           <span className="text-zinc-500 dark:text-zinc-500 font-medium">
             Visibility
           </span>
-          <span className="text-zinc-900 dark:text-zinc-300 font-bold transition-colors duration-300">
-            Community
+          <span className="text-zinc-900 dark:text-zinc-300 font-bold transition-colors duration-300 capitalize">
+            {visibility}
           </span>
         </div>
         <div className="p-4 flex justify-between">
           <span className="text-zinc-500 dark:text-zinc-500 font-medium">
-            Owner
+            Type
           </span>
           <span className="text-zinc-900 dark:text-zinc-300 font-bold transition-colors duration-300">
-            You
+            {isEdit ? "Revised" : "New"}
           </span>
         </div>
       </div>
@@ -56,27 +72,40 @@ export const PublishSidebar = ({ onPublish, onSaveDraft }: Props) => {
         <h4 className="text-[11px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest transition-colors duration-300">
           Student-facing summary
         </h4>
-        <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed italic border-l-2 border-zinc-300 dark:border-zinc-700 pl-4 transition-colors duration-300">
-          &quot;In this lesson, you&apos;ll explore how plants turn light into energy
-          through photosynthesis.&quot;
+        <textarea
+          value={studentSummary}
+          onChange={(e) => setFormData((prev: any) => ({ ...prev, student_summary: e.target.value }))}
+          placeholder="E.g. In this lesson, you'll explore photosynthesis..."
+          className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-zinc-900 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 min-h-[80px] resize-none italic transition-all"
+        />
+        <p className="text-[9px] text-zinc-400 leading-relaxed italic">
+          This note will be visible to students when they access this resource.
         </p>
       </div>
 
       <div className="pt-6 space-y-3">
-        <button
+        <Button
           onClick={onPublish}
-          className="w-full bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-400 text-white dark:text-zinc-950 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 dark:shadow-emerald-900/20"
+          variant="emerald"
+          size="lg"
+          fullWidth
+          isLoading={isSaving}
         >
-          Publish to repository
-        </button>
-        <button 
-        onClick={onSaveDraft}
-        className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-transparent text-zinc-600 dark:text-zinc-400 py-3 rounded-xl font-bold text-xs hover:bg-zinc-50 dark:hover:text-white transition-colors duration-300">
-          Save draft
-        </button>
+          {isEdit ? "Update and Publish" : "Publish to repository"}
+        </Button>
+        <Button 
+          onClick={onSaveDraft}
+          variant="outline"
+          size="lg"
+          fullWidth
+          disabled={isSaving}
+        >
+          {isEdit ? "Update Draft" : "Save as draft"}
+        </Button>
         <button
           onClick={() => router.back()}
-          className="w-full text-zinc-500 dark:text-zinc-600 hover:text-rose-500 dark:hover:text-rose-500 py-2 text-[11px] font-bold transition-colors duration-300"
+          disabled={isSaving}
+          className="w-full text-zinc-500 dark:text-zinc-600 hover:text-rose-500 dark:hover:text-rose-500 py-2 text-[11px] font-bold transition-colors duration-300 disabled:opacity-30"
         >
           Cancel
         </button>
@@ -84,3 +113,4 @@ export const PublishSidebar = ({ onPublish, onSaveDraft }: Props) => {
     </div>
   );
 };
+

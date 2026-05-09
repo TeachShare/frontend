@@ -7,11 +7,12 @@ import {
   Bookmark,
   ChevronDown,
   Link as LinkIcon,
-  FileText,
   Loader2,
+  Flag,
 } from "lucide-react";
 import { Post } from "@/types/community";
 import { CommentItem } from "./CommentItem";
+import { ReportModal } from "../resources/detail/ReportModal";
 import {
   useComments,
   useToggleLike,
@@ -19,6 +20,7 @@ import {
 } from "@/hooks/useCommunity";
 import Image from "next/image";
 import Link from "next/link";
+import { getAvatarUrl } from "@/lib/utils";
 
 interface PostItemProps {
   post: Post;
@@ -27,6 +29,7 @@ interface PostItemProps {
 export const PostItem = ({ post }: PostItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [commentInput, setCommentInput] = useState("");
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Hook into our React Query logic
   const toggleLikeMutation = useToggleLike();
@@ -57,14 +60,14 @@ export const PostItem = ({ post }: PostItemProps) => {
         {/* Author Header */}
         <div className="flex justify-between items-start mb-5">
           <div className="flex gap-3.5">
-            <Link href={`/profile/${post.author.id}`} className="flex gap-3.5">
+            <Link href={`/profile/${post.author.username || post.author.id}`} className="flex gap-3.5">
                 <div className="w-10 h-10 bg-zinc-50 dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-lg shadow-inner cursor-pointer hover:border-emerald-500/50 transition-colors">
                 <Image
-                    src={post.author.avatar || ""}
-                    width={10}
-                    height={10}
+                    src={getAvatarUrl(post.author.avatar, post.author.name, post.author.id)}
+                    width={40}
+                    height={40}
                     alt={post.author.name}
-                    className="w-[100%] h-full rounded-lg"
+                    className="w-full h-full rounded-lg object-cover"
                 />
                 </div>
                 <div>
@@ -77,7 +80,16 @@ export const PostItem = ({ post }: PostItemProps) => {
                 </div>
             </Link>
           </div>
-          <MoreHorizontal size={18} className="text-zinc-400 cursor-pointer" />
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsReportModalOpen(true)}
+              className="p-1 text-zinc-300 hover:text-rose-500 transition-colors"
+              title="Report Post"
+            >
+              <Flag size={14} />
+            </button>
+            <MoreHorizontal size={18} className="text-zinc-400 cursor-pointer" />
+          </div>
         </div>
 
         {/* Post Content */}
@@ -194,6 +206,13 @@ export const PostItem = ({ post }: PostItemProps) => {
           )}
         </div>
       )}
+      
+      <ReportModal 
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetId={post.id}
+        targetType="post"
+      />
     </article>
   );
 };

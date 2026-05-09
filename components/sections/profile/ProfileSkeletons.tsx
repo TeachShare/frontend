@@ -2,11 +2,11 @@ import React from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 export const SkeletonProfileHeader = () => (
-  <div className="rounded-2xl overflow-hidden border border-[#1f2937] bg-[#121212] mb-8">
-    <div className="h-40 bg-zinc-800 animate-pulse" />
+  <div className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-[#1f2937] bg-white dark:bg-[#121212] mb-8 transition-colors duration-300">
+    <div className="h-40 bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
     
     <div className="px-8 pb-8 -mt-12 relative flex flex-col md:flex-row items-end gap-6">
-      <Skeleton className="w-32 h-32 rounded-3xl border-4 border-[#121212] shrink-0" />
+      <Skeleton className="w-32 h-32 rounded-3xl border-4 border-white dark:border-[#121212] shrink-0" />
       <div className="flex-1 flex flex-col md:flex-row justify-between items-start md:items-center w-full">
         <div className="space-y-2">
           <Skeleton className="h-8 w-64" />
@@ -38,7 +38,7 @@ export const SkeletonProfileHeader = () => (
 );
 
 export const SkeletonProfileResourceCard = () => (
-  <div className="rounded-2xl border border-[#1f2937] bg-[#121212] p-5 space-y-4">
+  <div className="rounded-2xl border border-zinc-200 dark:border-[#1f2937] bg-white dark:bg-[#121212] p-5 space-y-4 transition-colors duration-300">
     <div className="flex justify-between items-start">
       <div className="flex gap-2">
         <Skeleton className="h-5 w-20 rounded" />
@@ -54,7 +54,7 @@ export const SkeletonProfileResourceCard = () => (
       <Skeleton className="h-5 w-16 rounded-lg" />
       <Skeleton className="h-5 w-16 rounded-lg" />
     </div>
-    <div className="pt-4 border-t border-white/5 flex justify-between">
+    <div className="pt-4 border-t border-zinc-100 dark:border-white/5 flex justify-between">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="h-3 w-32" />
     </div>

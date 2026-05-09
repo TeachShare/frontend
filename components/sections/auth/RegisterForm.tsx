@@ -26,6 +26,7 @@
 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,7 +35,7 @@
     const handleRegister = async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!email || !password || !firstName || !lastName)
+      if (!email || !password || !firstName || !lastName || !username)
         return toast.error("Please fill in all fields");
 
       if (password !== confirmPassword)
@@ -45,12 +46,14 @@
       try {
         const first_name = firstName.trim();
         const last_name = lastName.trim();
+        const user_name = username.trim().toLowerCase();
 
         const registerRequest = async () => {
-          const res = await fetch("http://localhost:5000/api/v1/auth/register", {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+          const res = await fetch(`${apiUrl}/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ first_name, last_name, email, password }),
+            body: JSON.stringify({ first_name, last_name, username: user_name, email, password }),
             credentials: "include", // CRITICAL: Allows the browser to save cookies
           });
 
@@ -70,8 +73,8 @@
         );
         
 
-        if (data.verification_hash) {
-          router.push(`/verification/${data.verification_hash}`);
+        if (data.verification_token) {
+          router.push(`/verification/${data.verification_token}`);
         } 
 
         if (onSuccess) onSuccess();
@@ -124,6 +127,25 @@
                 className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Username */}
+        <div className="space-y-1.5">
+          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide">
+            Username
+          </label>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#484f58] text-sm font-bold">
+              @
+            </div>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="johndoe"
+              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-lg py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:border-emerald-500 dark:focus:border-[#238636]"
+            />
           </div>
         </div>
 

@@ -127,15 +127,44 @@ export const ResourceForm = ({
           </div>
         </FormField>
         
-        <FormField label="Estimated duration">
-          <input
-            name="duration"
-            value={formData.duration}
-            onChange={handleChange}
-            type="text"
-            placeholder="e.g. 45 minutes"
-            className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-zinc-900 dark:text-zinc-300 focus:outline-none transition-colors duration-300"
-          />
+        <FormField label="Estimated duration" required>
+          <div className="flex gap-2">
+            <div className="relative flex-[2]">
+              <input
+                name="duration_value"
+                value={formData.duration_value}
+                onChange={(e) => {
+                  // Only allow numbers, dashes, and periods (for ranges like 1-2 or 1.5)
+                  const val = e.target.value;
+                  if (/^[0-9.-]*$/.test(val)) {
+                    handleChange(e);
+                  }
+                }}
+                type="text"
+                maxLength={10}
+                placeholder="e.g. 45 or 2-3"
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-zinc-900 dark:text-zinc-300 focus:outline-none transition-colors duration-300"
+              />
+            </div>
+            <div className="relative flex-1">
+              <select
+                name="duration_unit"
+                value={formData.duration_unit}
+                onChange={handleChange}
+                className="w-full h-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-[11px] font-bold text-zinc-600 dark:text-zinc-400 appearance-none focus:outline-none transition-colors duration-300"
+              >
+                <option value="Minutes">Minutes</option>
+                <option value="Hours">Hours</option>
+                <option value="Days">Days</option>
+                <option value="Weeks">Weeks</option>
+                <option value="Sessions">Sessions</option>
+              </select>
+              <ChevronDown
+                size={12}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 pointer-events-none transition-colors duration-300"
+              />
+            </div>
+          </div>
         </FormField>
       </div>
 

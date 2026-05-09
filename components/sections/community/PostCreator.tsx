@@ -11,19 +11,21 @@ import {
 } from "lucide-react";
 import { Attachment } from "@/types/community";
 import { useMyResources } from "@/hooks/useResources";
+import { Button } from "@/components/ui/Button";
 
 interface PostCreatorProps {
   onPublish: (content: string, attachments: Attachment[]) => void;
+  isPublishing?: boolean;
 }
 
-export const PostCreator = ({ onPublish }: PostCreatorProps) => {
+export const PostCreator = ({ onPublish, isPublishing = false }: PostCreatorProps) => {
   const [postText, setPostText] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { data: resourcesResponse, isLoading: isLoadingResources } =
     useMyResources();
-  const myResources = resourcesResponse?.data || [];
+  const myResources = resourcesResponse?.resources || [];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -235,12 +237,15 @@ export const PostCreator = ({ onPublish }: PostCreatorProps) => {
             )}
           </div>
         </div>
-        <button
+        <Button
           onClick={handlePublish}
-          className="px-6 py-2.5 bg-zinc-900 dark:bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:opacity-90 active:scale-95 shadow-md shadow-emerald-500/10"
+          variant="emerald"
+          size="md"
+          isLoading={isPublishing}
+          className="px-6 py-2.5 tracking-[0.2em]"
         >
           Publish
-        </button>
+        </Button>
       </div>
     </div>
   );

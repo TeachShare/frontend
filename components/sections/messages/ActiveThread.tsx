@@ -6,6 +6,7 @@ import { useThread } from "@/hooks/useMessages";
 import { useUser } from "@/hooks/useUser";
 import { Message } from "@/types/messages";
 import { MessagesAPI } from "@/lib/messages";
+import { getAvatarUrl } from "@/lib/utils";
 
 interface Props {
   conversation?: any;
@@ -120,7 +121,7 @@ export const ActiveThread = ({ conversation, sendMessage }: Props) => {
       <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800/40 flex items-center justify-between bg-white dark:bg-zinc-900/10 shrink-0 transition-colors duration-300">
         <div className="flex items-center space-x-4">
           <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 overflow-hidden shrink-0 transition-colors duration-300">
-            <img src={conversation.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${conversation.id}`} alt="Avatar" />
+            <img src={getAvatarUrl(conversation.avatar, conversation.name, conversation.id, 'avataaars')} alt="Avatar" />
           </div>
           <div>
             <h3 className="text-[15px] font-bold text-zinc-900 dark:text-white leading-tight transition-colors duration-300">{conversation.name}</h3>

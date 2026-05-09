@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create a custom instance
 export const api = axios.create({
-  baseURL: "http://localhost:5000/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1",
   withCredentials: true, // ALWAYS send the HttpOnly JWT cookie
 });
 

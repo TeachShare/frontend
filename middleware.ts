@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const token = request.cookies.get("access_token_cookie");
 
   const isVerified = request.cookies.get("is_verified")?.value === "true";
-  const verifHash = request.cookies.get("verif_hash")?.value;
+  const verifToken = request.cookies.get("verif_token")?.value;
 
   const { pathname } = request.nextUrl;
 
-  if (token && (pathname === "/auth" || pathname === "/auth")) {
+  // If user has a token and is verified, don't let them go to /auth
+  if (token && isVerified && pathname.startsWith("/auth")) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -27,15 +28,17 @@ export function proxy(request: NextRequest) {
     pathname.startsWith(route),
   );
 
+  // If trying to access a protected route without being logged in
   if (!token && isProtectedRoute) {
     return NextResponse.redirect(new URL("/auth?view=login", request.url));
   }
 
+  // If logged in but NOT verified, and trying to access protected content
   if (token && !isVerified && isProtectedRoute) {
     if (!pathname.startsWith("/verification")) {
-      const target = verifHash
-        ? `/verification/${verifHash}`
-        : "/auth?view=login";
+      const target = verifToken
+        ? `/verification/${verifToken}`
+        : "/auth?view=login"; // This might still loop if /auth redirects to dashboard
       return NextResponse.redirect(new URL(target, request.url));
     }
   }

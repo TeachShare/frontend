@@ -2,8 +2,9 @@ import React from "react";
 
 export const GoogleAuthButton = () => {
   const handleGoogleLogin = () => {
-  window.location.href = "http://localhost:5000/api/v1/auth/login/google";
-};
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+    window.location.href = `${apiUrl}/auth/login/google`;
+  };
   return (
     <button
       onClick={handleGoogleLogin}

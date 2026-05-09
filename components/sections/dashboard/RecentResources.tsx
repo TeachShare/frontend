@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Eye, Pencil, Share2, FileText, Activity, Users, Link as LinkIcon, FileJson, LucideIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "next/navigation";
 
 const getTypeIcon = (type: string): LucideIcon => {
   const t = type?.toLowerCase() || "";
@@ -18,6 +19,7 @@ interface RecentResourcesProps {
 
 export const RecentResources = ({ resources = [] }: RecentResourcesProps) => {
   const [activeTab, setActiveTab] = useState("Mine");
+  const router = useRouter();
 
   const filteredResources = resources.filter(res => {
     if (activeTab === "Mine") return true;
@@ -56,7 +58,7 @@ export const RecentResources = ({ resources = [] }: RecentResourcesProps) => {
               <th className="px-6 py-4">Title</th>
               <th className="px-6 py-4">Subject</th>
               <th className="px-6 py-4">Type</th>
-              <th className="px-6 py-4">Last activity</th>
+              <th className="px-6 py-4 Last activity">Last activity</th>
               <th className="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
@@ -93,13 +95,27 @@ export const RecentResources = ({ resources = [] }: RecentResourcesProps) => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-3 text-zinc-400 dark:text-zinc-500">
-                        <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                        <button 
+                          onClick={() => {
+                            const slug = `${item.collection_id}-${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                            router.push(`/resources/${slug}`);
+                          }}
+                          className="p-1 hover:text-blue-500 transition-colors"
+                          title="View Resource"
+                        >
                           <Eye size={15} />
                         </button>
-                        <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                        <button 
+                          onClick={() => {
+                            const slug = `${item.collection_id}-${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                            router.push(`/resources/create?edit=${slug}`);
+                          }}
+                          className="p-1 hover:text-emerald-500 transition-colors"
+                          title="Edit Resource"
+                        >
                           <Pencil size={13} />
                         </button>
-                        <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                        <button className="p-1 hover:text-zinc-900 dark:hover:text-white transition-colors" title="Share">
                           <Share2 size={14} />
                         </button>
                       </div>
@@ -120,7 +136,10 @@ export const RecentResources = ({ resources = [] }: RecentResourcesProps) => {
       <div className="p-4 border-t border-zinc-200 dark:border-zinc-800/30 text-center bg-zinc-50 dark:bg-zinc-950/20 transition-colors duration-300">
         <p className="text-[11px] text-zinc-500 dark:text-zinc-600">
           Showing activity from your recent uploads. Go to{" "}
-          <span className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold cursor-pointer transition-colors">
+          <span 
+            onClick={() => router.push('/resources')}
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold cursor-pointer transition-colors"
+          >
             My Resources
           </span>{" "}
           for full history.

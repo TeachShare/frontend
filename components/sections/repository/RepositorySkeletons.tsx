@@ -2,7 +2,7 @@ import React from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 export const SkeletonRepositoryCard = () => (
-  <div className="bg-[#121417] border border-[#1F2226] rounded-xl overflow-hidden group">
+  <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-[#1F2226] rounded-xl overflow-hidden group">
     <div className="p-6 space-y-4">
       <div className="flex justify-between items-start">
         <div className="space-y-2">
@@ -24,7 +24,7 @@ export const SkeletonRepositoryCard = () => (
       </div>
     </div>
 
-    <div className="px-6 py-4 border-t border-[#1F2226] flex items-center justify-between">
+    <div className="px-6 py-4 border-t border-zinc-100 dark:border-[#1F2226] flex items-center justify-between">
       <Skeleton className="h-4 w-16" />
       <div className="flex gap-3">
         <Skeleton className="h-8 w-8 rounded-lg" />

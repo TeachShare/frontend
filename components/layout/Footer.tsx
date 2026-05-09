@@ -51,16 +51,16 @@ const Footer = () => {
               </a>
             </div>
             <div className="flex gap-6 text-xs text-zinc-600 dark:text-[#8b949e] transition-colors duration-300">
-              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300">
                 About
               </a>
-              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300">
                 Help
               </a>
-              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300">
                 Terms
               </a>
-              <a href="#" className="hover:text-emerald-600 dark:hover:text-[#72b37d] transition-colors duration-300">
+              <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300">
                 Privacy
               </a>
             </div>

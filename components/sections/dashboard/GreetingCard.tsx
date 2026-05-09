@@ -45,11 +45,11 @@ export const GreetingCard = ({ lastName, role, institution, resourcesCount = 0 }
 
       <div className="flex items-center space-x-4 mt-8">
         <button
-          onClick={() => router.push("/generator")}
+          onClick={() => router.push("/resources/create")}
           className="bg-emerald-500 text-white dark:text-zinc-950 font-bold py-2 px-5 rounded-lg flex items-center space-x-2 text-[13px] hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all"
         >
           <Plus size={18} />
-          <span>New resource</span>
+          <span>Upload resource</span>
         </button>
         <button 
           onClick={() => router.push("/community")}

@@ -10,11 +10,13 @@ import {
   Settings,
   Plus,
   Share2,
+  Shield
 } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 import Image from "next/image";
 import Logo from "@/public/logos/logo.svg";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/hooks/useUser";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const router = useRouter();
+  const { data: user } = useUser();
   return (
     <>
       {/* Mobile Overlay */}
@@ -65,6 +68,19 @@ export const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
           <SidebarItem icon={Wand2} label="AI Generator" href="/generator" />
           <SidebarItem icon={MessageSquare} label="Messages" href="/messages" />
           <SidebarItem icon={Settings} label="Settings" href="/settings" />
+
+          {user?.is_admin && (
+             <>
+              <p className="px-3 text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-6 mb-2">
+                Administration
+              </p>
+              <SidebarItem 
+                icon={Shield} 
+                label="Moderation" 
+                href="/admin/moderation" 
+              />
+             </>
+          )}
         </nav>
 
         <div className="p-4 space-y-2 border-t border-zinc-200 dark:border-zinc-800/60 transition-colors duration-300">

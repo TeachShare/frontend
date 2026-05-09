@@ -1,14 +1,18 @@
 "use client"
-import React, { useState, useEffect } from "react";
-import { Camera, Trash2, Save } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Camera, Trash2, Save, Loader2 } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
-import { useUpdateProfile } from "@/hooks/useTeacher";
-import Layout from "@/components/layout/Layout";
+import { useUpdateProfile, useUploadProfilePhoto } from "@/hooks/useTeacher";
 import toast from "react-hot-toast";
+import { getAvatarUrl } from "@/lib/utils";
 
 export const ProfileSection = () => {
   const { data: user, isLoading }: any = useUser();
+  const router = useRouter();
   const updateProfile = useUpdateProfile();
+  const uploadPhoto = useUploadProfilePhoto();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     role: "",
@@ -41,9 +45,36 @@ export const ProfileSection = () => {
       }
     });
   };
-  
-  const seed = `${user?.id ?? "0"}-${user?.last_name ?? "User"}`;
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size exceeds 5MB limit");
+        return;
+      }
+      
+      uploadPhoto.mutate(file, {
+        onSuccess: () => {
+          toast.success("Profile photo updated!");
+        },
+        onError: (err: any) => {
+          toast.error("Failed to upload photo.");
+        }
+      });
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    // Reset to default Dicebear avatar
+    const defaultAvatar = getAvatarUrl(null, user?.first_name || "User", user?.id);
+    updateProfile.mutate({ ...formData, profile_image_url: defaultAvatar }, {
+      onSuccess: () => {
+        toast.success("Profile photo removed.");
+      }
+    });
+  };
+  
   if(isLoading){
     return (
       <div className="flex items-center justify-center p-12">
@@ -69,10 +100,13 @@ export const ProfileSection = () => {
                 disabled={updateProfile.isPending}
                 className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
             >
-                <Save size={14} />
+                {updateProfile.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                 {updateProfile.isPending ? "Saving..." : "Save Changes"}
             </button>
-            <button className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors duration-300">
+            <button 
+                onClick={() => router.push(`/profile/${user?.username || user?.id}`)}
+                className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors duration-300"
+            >
                 Public Profile
             </button>
         </div>
@@ -84,25 +118,47 @@ export const ProfileSection = () => {
             Profile photo
           </p>
           <div className="flex items-center space-x-6">
-            <img
-              src={user?.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`}
-              className="w-20 h-20 rounded-full border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 shadow-sm dark:shadow-xl transition-colors duration-300"
-              alt="Profile Large"
-            />
+            <div className="relative group">
+                <img
+                src={getAvatarUrl(user?.profile, user?.first_name, user?.id, 'avataaars')}
+                className="w-20 h-20 rounded-full border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 shadow-sm dark:shadow-xl transition-colors duration-300 object-cover"
+                alt="Profile Large"
+                />
+                {uploadPhoto.isPending && (
+                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
+                        <Loader2 size={24} className="animate-spin text-white" />
+                    </div>
+                )}
+            </div>
             <div className="space-y-3">
               <p className="text-[11px] text-zinc-600 dark:text-zinc-500 max-w-sm leading-relaxed transition-colors duration-300">
                 A clear, friendly photo helps collaborators recognize you across
                 messages and resources.
               </p>
               <div className="flex items-center space-x-3">
-                <button className="flex items-center space-x-2 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg transition-colors duration-300">
+                <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleFileChange}
+                />
+                <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadPhoto.isPending}
+                    className="flex items-center space-x-2 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg transition-colors duration-300 disabled:opacity-50"
+                >
                   <Camera
                     size={14}
                     className="text-zinc-500 dark:text-zinc-500"
                   />
-                  <span>Upload new</span>
+                  <span>{uploadPhoto.isPending ? "Uploading..." : "Upload new"}</span>
                 </button>
-                <button className="flex items-center space-x-2 text-[11px] font-bold text-rose-600 dark:text-rose-500/70 hover:text-rose-700 dark:hover:text-rose-400 px-2 py-1.5 transition-colors duration-300">
+                <button 
+                    onClick={handleRemovePhoto}
+                    disabled={updateProfile.isPending}
+                    className="flex items-center space-x-2 text-[11px] font-bold text-rose-600 dark:text-rose-500/70 hover:text-rose-700 dark:hover:text-rose-400 px-2 py-1.5 transition-colors duration-300 disabled:opacity-50"
+                >
                   <Trash2 size={14} />
                   <span>Remove</span>
                 </button>
@@ -119,7 +175,7 @@ export const ProfileSection = () => {
             <input
               type="text"
               readOnly
-              value={`${user?.first_name} ${user?.last_name}`}
+              value={`${user?.first_name || ""} ${user?.last_name || ""}`}
               className="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-[13px] text-zinc-500 dark:text-zinc-500 cursor-not-allowed transition-colors duration-300"
             />
           </div>
@@ -130,7 +186,7 @@ export const ProfileSection = () => {
             <input
               type="text"
               readOnly
-              value={user?.email}
+              value={user?.email || ""}
               className="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-[13px] text-zinc-500 dark:text-zinc-500 cursor-not-allowed transition-colors duration-300"
             />
           </div>

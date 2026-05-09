@@ -29,7 +29,8 @@ export const LoginForm = () => {
 
     setLoading(true);
     try {
-      const loginPromise = fetch("http://localhost:5000/api/v1/auth/login", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+      const loginPromise = fetch(`${apiUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -46,8 +47,8 @@ export const LoginForm = () => {
           loading: "Signing you in...",
           success: (data) => {
           
-            if(!data.is_verified && data.verification_hash){
-                router.push(`/verification/${data.verification_hash}`);
+            if(!data.is_verified && data.verification_token){
+                router.push(`/verification/${data.verification_token}`);
                 return "Please verify your account to continue."
             }
 
