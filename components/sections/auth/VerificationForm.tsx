@@ -12,7 +12,8 @@ interface Props {
 }
 
 export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Props) => {
-  const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
+  // Adjusted to 8 digits for Supabase compatibility
+  const [code, setCode] = useState<string[]>(["", "", "", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
 
@@ -34,15 +35,15 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
 
     // Handle multi-character input (like paste or fast typing)
     if (value.length > 1) {
-      const pastedCode = value.slice(0, 6).split("");
-      for (let i = 0; i < 6; i++) {
+      const pastedCode = value.slice(0, 8).split("");
+      for (let i = 0; i < 8; i++) {
         if (pastedCode[i]) newCode[i] = pastedCode[i];
       }
       setCode(newCode);
 
       // Focus appropriate box
-      const nextIndex = Math.min(newCode.findIndex(v => v === ""), 5);
-      const focusIndex = nextIndex === -1 ? 5 : nextIndex;
+      const nextIndex = Math.min(newCode.findIndex(v => v === ""), 7);
+      const focusIndex = nextIndex === -1 ? 7 : nextIndex;
       inputRefs.current[focusIndex]?.focus();
       
       // Auto-submit if complete
@@ -56,12 +57,12 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
     setCode(newCode);
 
     // Auto-advance
-    if (value !== "" && index < 5) {
+    if (value !== "" && index < 7) {
       inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-submit if this was the last digit and code is complete
-    if (value !== "" && index === 5 && newCode.every(v => v !== "")) {
+    if (value !== "" && index === 7 && newCode.every(v => v !== "")) {
        submitVerification(newCode.join(""));
     }
   };
@@ -112,7 +113,7 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
       const errorMessage = error.response?.data?.error || "Invalid verification code.";
       toast.error(errorMessage);
 
-      setCode(["", "", "", "", "", ""]);
+      setCode(["", "", "", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } finally {
       setIsVerifying(false);
@@ -155,13 +156,13 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
       </h1>
 
       <p className="text-sm text-zinc-500 dark:text-gray-400 mb-8 leading-relaxed transition-colors duration-300">
-        We&apos;ve sent a 6-digit verification code to <br />
+        We&apos;ve sent a verification code to <br />
         <span className="text-zinc-900 dark:text-white font-medium">{userEmail || "your email"}</span>. <br />
         Enter it below to confirm your account.
       </p>
 
       <form onSubmit={(e) => { e.preventDefault(); submitVerification(code.join("")); }} className="w-full">
-        <div className="flex justify-between gap-2 mb-8">
+        <div className="flex justify-between gap-1 mb-8">
           {code.map((digit, index) => (
             <input
               key={index}
@@ -173,7 +174,7 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
               autoComplete="one-time-code"
               pattern="\d{1}"
               maxLength={1}
-              className="w-12 h-14 text-center text-xl font-semibold bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-gray-600"
+              className="w-10 h-12 text-center text-lg font-semibold bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-gray-600"
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}

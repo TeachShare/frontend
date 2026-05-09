@@ -65,6 +65,18 @@ export const DetailSidebar = ({
     setMounted(true);
   }, []);
 
+  // BLOCK BACKGROUND SCROLL
+  useEffect(() => {
+    if (viewFile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [viewFile]);
+
   const trackDownload = async () => {
     try {
       await api.post(`/resource_collection/${resource.collection_id}/download`);
@@ -113,8 +125,7 @@ export const DetailSidebar = ({
   return (
     <>
       <div className="col-span-12 lg:col-span-4 space-y-6">
-        {/* Files Card */}
-        <div className="bg-white dark:bg-[#111317] border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm overflow-hidden transition-colors duration-300">
+        <div className="bg-white dark:bg-[#111317] border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm overflow-hidden">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-[10px] font-bold text-zinc-500 dark:text-[#8E9196] uppercase tracking-[0.2em]">
               Resource Content
@@ -163,7 +174,7 @@ export const DetailSidebar = ({
             ))}
           </div>
 
-          {/* Interaction Bar */}
+          {/* Stats & Actions */}
           <div className="grid grid-cols-3 gap-2 mt-8">
             <button
               onClick={onLike}
@@ -188,7 +199,6 @@ export const DetailSidebar = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="space-y-3 mt-8">
             {canEdit && !resource.is_published && (
               <Button
@@ -229,67 +239,52 @@ export const DetailSidebar = ({
             </Button>
           </div>
         </div>
-
-        {/* Danger Zone */}
-        {isOwner ? (
-          <button 
-            onClick={onDelete}
-            disabled={isDeleting}
-            className="w-full group py-2 text-zinc-400 dark:text-[#5C5F66] hover:text-rose-500 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isDeleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} className="opacity-50 group-hover:opacity-100" />}
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em]">{isDeleting ? "Deleting..." : "Delete resource"}</span>
-          </button>
-        ) : (
-          <button 
-            onClick={() => setIsReportModalOpen(true)}
-            className="w-full group py-2 text-zinc-400 dark:text-[#5C5F66] hover:text-rose-500 transition-colors flex items-center justify-center gap-2"
-          >
-            <Flag size={12} className="opacity-50 group-hover:opacity-100" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Report resource</span>
-          </button>
-        )}
       </div>
 
-      {/* Doc Viewer Modal */}
+      {/* UPDATED MODAL WITH SCREENSHOT LOGIC */}
       {viewFile && (
-        <div className="fixed inset-0 z-[110] flex flex-col bg-zinc-950/90 dark:bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="flex-none h-14 flex justify-between items-center px-6 bg-white dark:bg-[#0c0d0f] border-b border-zinc-200 dark:border-zinc-800 shadow-sm z-20 transition-colors duration-300">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-white/95 dark:bg-[#08090A]/95 backdrop-blur-md animate-in fade-in duration-300">
+          {/* Header */}
+          <div className="flex-none h-16 flex justify-between items-center px-8 border-b border-zinc-200 dark:border-[#1F2226]">
             <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-emerald-500 text-white rounded-lg shadow-lg shadow-emerald-500/20">
-                <FileText size={16} />
+              <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center">
+                <FileText size={16} className="text-white dark:text-black" />
               </div>
-              <h3 className="text-zinc-900 dark:text-white font-bold text-sm truncate max-w-lg transition-colors duration-300">{viewFile.name}</h3>
+              <h3 className="text-zinc-900 dark:text-white font-bold text-sm tracking-tight">
+                {viewFile.name}
+              </h3>
             </div>
-            <button 
+            <button
               onClick={() => setViewFile(null)}
-              className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full transition-all"
+              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-[#1F2226] rounded-full transition-all"
             >
               <X size={20} />
             </button>
           </div>
-          
-          <div className="flex-1 p-4 md:p-8 flex flex-col min-h-0 relative z-10">
-            <div className="flex-1 w-full max-w-7xl mx-auto rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl relative bg-zinc-50 dark:bg-[#0D0F12] flex flex-col">
-                {mounted && (
-                  <DocViewer 
-                    key={resolvedTheme}
-                    documents={[{ uri: viewFile.url, fileName: viewFile.name }]} 
-                    pluginRenderers={DocViewerRenderers}
-                    config={{ 
-                      header: { disableHeader: true },
-                      pdfVerticalScrollByDefault: true,
-                    }}
-                    theme={{
-                      primary: "#00D084",
-                      secondary: resolvedTheme === 'dark' ? "#08090A" : "#f1f5f9",
-                      tertiary: resolvedTheme === 'dark' ? "#111317" : "#e2e8f0",
-                      textPrimary: resolvedTheme === 'dark' ? "#ffffff" : "#0f172a",
-                      textSecondary: resolvedTheme === 'dark' ? "#8E9196" : "#475569",
-                    }}
-                    style={{ flex: 1, height: "100%", width: "100%" }}
-                  />
-                )}
+
+          {/* Main Viewer Container matching screenshot logic */}
+          <div className="flex-1 relative w-full max-w-7xl mx-auto my-2 md:my-4 overflow-hidden">
+            <div className="absolute inset-0 [&_*]:!h-full [&_iframe]:!h-full [&_iframe]:!border-none">
+              {mounted && (
+                <DocViewer
+                  documents={[{ uri: viewFile.url, fileName: viewFile.name }]}
+                  pluginRenderers={DocViewerRenderers}
+                  style={{ width: "100%", height: "100%" }}
+                  config={{
+                    header: {
+                      disableHeader: true,
+                    },
+                  }}
+                  theme={{
+                    primary: "#2563eb",
+                    secondary: "#090a0c",
+                    tertiary: "#18181b",
+                    textPrimary: "#ffffff",
+                    textSecondary: "#a1a1aa",
+                    disableThemeScrollbar: false,
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
