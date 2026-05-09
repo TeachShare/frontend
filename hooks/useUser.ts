@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/axios";
 
 // 1. We MUST define what the data looks like so TypeScript doesn't panic
 export interface TeacherInfo {
@@ -20,20 +21,17 @@ export interface User {
   is_admin: boolean;
 }
 
-// 2. We explicitly tell the function that it will return a Promise containing our User
+// 2. The fetcher function
 const fetchCurrentUser = async (): Promise<User> => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-  const response = await fetch(`${apiUrl}/auth/me`, {
-    method: "GET",
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Not authenticated");
+  try {
+    const response = await api.get("/auth/me");
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      throw new Error("Not authenticated");
+    }
+    throw error;
   }
-
-  // TypeScript now knows this isn't just random data
-  return response.json();
 };
 
 // 3. The custom hook

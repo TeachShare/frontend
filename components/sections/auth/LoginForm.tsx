@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { api } from "@/lib/axios";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 
 const toastStyle = {
@@ -29,15 +30,9 @@ export const LoginForm = () => {
 
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-      const loginPromise = fetch(`${apiUrl}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      }).then(async (res) => {
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message || "Login failed");
+      const loginPromise = api.post("/auth/login", { email, password }).then((res) => {
+        const data = res.data;
+        if (!data.success) throw new Error(data.message || "Login failed");
         return data;
       });
 
