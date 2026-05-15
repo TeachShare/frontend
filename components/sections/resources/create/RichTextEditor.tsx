@@ -12,6 +12,8 @@ import {
   ListOrdered,
   Quote,
   Code,
+  Heading2,
+  Heading3,
   LucideIcon,
 } from "lucide-react";
 
@@ -144,7 +146,7 @@ export const RichTextEditor = ({ value, onChange }: Props) => {
       StarterKit, 
       TextStyle, 
       FontSize,
-      Color, // <-- Add Color extension here
+      Color, 
     ],
     content: value,
     immediatelyRender: false,
@@ -154,10 +156,17 @@ export const RichTextEditor = ({ value, onChange }: Props) => {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm dark:prose-invert min-h-[200px] w-full bg-transparent p-6 text-xs text-zinc-900 dark:text-zinc-400 focus:outline-none max-w-none transition-colors duration-300 tiptap",
+          "prose prose-sm dark:prose-invert min-h-[250px] w-full bg-transparent p-6 text-[13px] leading-relaxed text-zinc-900 dark:text-zinc-400 focus:outline-none max-w-none transition-colors duration-300 tiptap",
       },
     },
   });
+
+  // Sync external value with editor content
+  React.useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value);
+    }
+  }, [value, editor]);
 
   return (
     <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden transition-colors duration-300">
@@ -195,7 +204,18 @@ export const RichTextEditor = ({ value, onChange }: Props) => {
           
           <div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1" />
           
-          {/* H2 Removed Here */}
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            isActive={editor.isActive("heading", { level: 2 })}
+            icon={Heading2}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            isActive={editor.isActive("heading", { level: 3 })}
+            icon={Heading3}
+          />
+
+          <div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1" />
           
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBlockquote().run()}

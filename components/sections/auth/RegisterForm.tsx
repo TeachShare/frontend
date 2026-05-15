@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { api } from "@/lib/axios";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 import { useRouter } from "next/navigation";
+import { UniversitySelect } from "./UniversitySelect";
 
 const toastStyle = {
   style: {
@@ -27,10 +28,12 @@ interface Props {
 export const RegisterForm = ({ onSuccess }: Props) => {
   const router = useRouter();
 
+  const [step, setStep] = useState(1);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [institution, setInstitution] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,12 +68,27 @@ export const RegisterForm = ({ onSuccess }: Props) => {
     calculateStrength(val);
   };
 
+  const nextStep = () => {
+    if (step === 1) {
+      if (!firstName || !lastName || !username) {
+        return toast.error("Please fill in your name and username", { icon: <AlertCircle className="text-rose-500" size={18} /> });
+      }
+    }
+    if (step === 2) {
+      if (!email || !institution) {
+        return toast.error("Please provide your email and institution", { icon: <AlertCircle className="text-rose-500" size={18} /> });
+      }
+      if (!email.includes("@")) {
+        return toast.error("Please provide a valid email", { icon: <AlertCircle className="text-rose-500" size={18} /> });
+      }
+    }
+    setStep(prev => prev + 1);
+  };
+
+  const prevStep = () => setStep(prev => prev - 1);
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!email || !password || !firstName || !lastName || !username) {
-      return toast.error("Please fill in all fields", { icon: <AlertCircle className="text-rose-500" size={18} /> });
-    }
 
     if (password !== confirmPassword) {
       return toast.error("Passwords do not match", { icon: <AlertCircle className="text-rose-500" size={18} /> });
@@ -93,6 +111,7 @@ export const RegisterForm = ({ onSuccess }: Props) => {
           last_name,
           username: user_name,
           email,
+          institution,
           password,
         });
 
@@ -129,188 +148,181 @@ export const RegisterForm = ({ onSuccess }: Props) => {
   const passwordsMatch = password && confirmPassword && password === confirmPassword;
 
   return (
-    <form className="space-y-5" onSubmit={handleRegister}>
-      {/* First & Last Name */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* First Name */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
-            First name
-          </label>
-          <div className="relative group">
-            <User
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
-              size={16}
-            />
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="John"
-              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
-            />
-          </div>
-        </div>
-
-        {/* Last Name */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
-            Last name
-          </label>
-          <div className="relative group">
-            <User
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
-              size={16}
-            />
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Doe"
-              className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Username */}
-      <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
-          Username
-        </label>
-        <div className="relative group">
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 text-sm font-bold transition-colors">
-            @
-          </div>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="johndoe"
-            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
-          />
-        </div>
-      </div>
-
-      {/* Email */}
-      <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
-          Work email
-        </label>
-        <div className="relative group">
-          <Mail
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
-            size={16}
-          />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@school.edu"
-            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
-          />
-        </div>
-      </div>
-
-      {/* Password */}
-      <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
-          Password
-        </label>
-        <div className="relative group">
-          <Lock
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
-            size={16}
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => handlePasswordChange(e.target.value)}
-            placeholder="Strong password"
-            className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all duration-300"
-          />
-        </div>
-        {password && (
-          <div className="space-y-1.5 pt-0.5 px-1">
-            <div className="flex gap-1 h-1">
-              {[...Array(5)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`flex-1 rounded-full transition-all duration-500 ${i < strength.score ? strength.color : 'bg-zinc-200 dark:bg-[#30363d]'}`}
-                />
-              ))}
+    <div className="space-y-6">
+      {/* Progress Indicator */}
+      <div className="flex items-center justify-between px-2 mb-2">
+        {[1, 2, 3].map((s) => (
+          <div key={s} className="flex items-center flex-1 last:flex-none">
+            <div 
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-300 ${
+                step >= s ? "bg-emerald-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+              }`}
+            >
+              {step > s ? <CheckCircle2 size={14} /> : s}
             </div>
-            <p className={`text-[9px] font-bold tracking-wide uppercase ${strength.score <= 2 ? 'text-rose-500' : strength.score <= 3 ? 'text-orange-500' : 'text-emerald-500'}`}>
-              {strength.label}
-            </p>
+            {s < 3 && (
+              <div className={`flex-1 h-[2px] mx-2 transition-all duration-500 ${step > s ? "bg-emerald-600" : "bg-zinc-100 dark:bg-zinc-800"}`} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <form className="space-y-5" onSubmit={handleRegister}>
+        {step === 1 && (
+          <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">First name</label>
+                <div className="relative group">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">Last name</label>
+                <div className="relative group">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">Username</label>
+              <div className="relative group">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 text-sm font-bold transition-colors">@</div>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="johndoe"
+                  className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all"
+                />
+              </div>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Confirm Password */}
-      <div className="space-y-1.5">
-        <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">
-          Confirm password
-        </label>
-        <div className="relative group">
-          <Lock
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors"
-            size={16}
-          />
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Match password"
-            className={`w-full bg-zinc-50 dark:bg-[#0d1117] border rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#484f58] focus:outline-none focus:ring-2 transition-all duration-300 ${
-              passwordsMatch 
-                ? "border-emerald-500/50 focus:ring-emerald-500/10" 
-                : confirmPassword && password !== confirmPassword
-                ? "border-rose-500/50 focus:ring-rose-500/10"
-                : "border-zinc-200 dark:border-[#30363d] focus:ring-emerald-500/10 focus:border-emerald-500/50"
-            }`}
-          />
-          {passwordsMatch && (
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-500 animate-in zoom-in duration-300">
-              <CheckCircle2 size={18} />
+        {step === 2 && (
+          <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">Work email</label>
+              <div className="relative group">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@school.edu"
+                  className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all"
+                />
+              </div>
             </div>
+            <UniversitySelect value={institution} onChange={setInstitution} error={!institution && loading} />
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
+                  placeholder="Strong password"
+                  className="w-full bg-zinc-50 dark:bg-[#0d1117] border border-zinc-200 dark:border-[#30363d] rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500/50 transition-all"
+                />
+              </div>
+              {password && (
+                <div className="space-y-1.5 pt-0.5 px-1">
+                  <div className="flex gap-1 h-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className={`flex-1 rounded-full transition-all duration-500 ${i < strength.score ? strength.color : 'bg-zinc-200 dark:bg-[#30363d]'}`} />
+                    ))}
+                  </div>
+                  <p className={`text-[9px] font-bold tracking-wide uppercase ${strength.score <= 2 ? 'text-rose-500' : strength.score <= 3 ? 'text-orange-500' : 'text-emerald-500'}`}>
+                    {strength.label}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-zinc-500 dark:text-[#8b949e] tracking-wide ml-1">Confirm password</label>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Match password"
+                  className={`w-full bg-zinc-50 dark:bg-[#0d1117] border rounded-xl py-3 pl-10 pr-4 text-sm text-zinc-900 dark:text-white transition-all ${
+                    passwordsMatch ? "border-emerald-500/50 focus:ring-emerald-500/10" : confirmPassword && password !== confirmPassword ? "border-rose-500/50 focus:ring-rose-500/10" : "border-zinc-200 dark:border-[#30363d] focus:ring-emerald-500/10 focus:border-emerald-500/50"
+                  }`}
+                />
+                {passwordsMatch && <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-500 animate-in zoom-in duration-300"><CheckCircle2 size={18} /></div>}
+              </div>
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer group pt-1">
+              <input type="checkbox" required className="w-4 h-4 rounded border-zinc-300 dark:border-[#30363d] bg-zinc-50 dark:bg-[#0d1117] text-emerald-600 focus:ring-0 cursor-pointer" />
+              <span className="text-[12px] text-zinc-500 dark:text-[#8b949e] group-hover:text-zinc-900 dark:group-hover:text-[#c9d1d9] transition-colors leading-none">I agree to the Terms and Privacy Policy</span>
+            </label>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 pt-2">
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={prevStep}
+              className="flex-1 bg-zinc-100 dark:bg-[#0d1117] hover:bg-zinc-200 dark:hover:bg-[#161b22] text-zinc-900 dark:text-white font-bold py-4 rounded-xl transition-all text-sm border border-zinc-200 dark:border-[#30363d]"
+            >
+              Back
+            </button>
+          )}
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              className="flex-[2] bg-emerald-600 hover:bg-emerald-700 dark:bg-[#238636] dark:hover:bg-[#2ea043] text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 text-sm"
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-[2] bg-emerald-600 hover:bg-emerald-700 dark:bg-[#238636] dark:hover:bg-[#2ea043] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 text-sm"
+            >
+              {loading ? "Processing..." : "Create account"}
+            </button>
           )}
         </div>
-      </div>
 
-      {/* Terms */}
-      <div className="flex items-center justify-between pt-1">
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input
-            type="checkbox"
-            required
-            className="w-4 h-4 rounded border-zinc-300 dark:border-[#30363d] bg-zinc-50 dark:bg-[#0d1117] text-emerald-600 dark:text-[#238636] focus:ring-0 transition-all cursor-pointer"
-          />
-          <span className="text-[12px] text-zinc-500 dark:text-[#8b949e] group-hover:text-zinc-900 dark:group-hover:text-[#c9d1d9] transition-colors leading-none">
-            I agree to the Terms and Privacy Policy
-          </span>
-        </label>
-      </div>
-
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-[#238636] dark:hover:bg-[#2ea043] active:scale-[0.98] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 dark:shadow-none mt-2 text-sm"
-      >
-        {loading ? "Processing..." : "Create account"}
-      </button>
-
-      {/* Divider */}
-      <div className="relative flex items-center py-2">
-        <div className="flex-grow border-t border-zinc-200 dark:border-[#30363d]"></div>
-        <span className="mx-4 text-zinc-400 dark:text-[#484f58] text-[10px] font-bold uppercase tracking-widest">
-          or
-        </span>
-        <div className="flex-grow border-t border-zinc-200 dark:border-[#30363d]"></div>
-      </div>
-
-      <GoogleAuthButton />
-    </form>
+        {step === 1 && (
+          <>
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-zinc-200 dark:border-[#30363d]"></div>
+              <span className="mx-4 text-zinc-400 dark:text-[#484f58] text-[10px] font-bold uppercase tracking-widest">or</span>
+              <div className="flex-grow border-t border-zinc-200 dark:border-[#30363d]"></div>
+            </div>
+            <GoogleAuthButton />
+          </>
+        )}
+      </form>
+    </div>
   );
 };

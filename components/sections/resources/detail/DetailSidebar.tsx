@@ -11,12 +11,15 @@ import {
   FileText,
   Globe,
   Flag,
+  Share2,
+  User,
 } from "lucide-react";
 import { ResourceDetail } from "@/types/resources";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { api } from "@/lib/axios";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 import "@cyntler/react-doc-viewer/dist/index.css";
@@ -30,6 +33,7 @@ interface Props {
   isLiked?: boolean;
   onLike?: () => void;
   onRemix?: () => void;
+  onShare?: () => void;
   isOwner?: boolean;
   canEdit?: boolean;
   isPublishing?: boolean;
@@ -44,6 +48,7 @@ export const DetailSidebar = ({
   isLiked,
   onLike,
   onRemix,
+  onShare,
   isOwner = false,
   canEdit = false,
   isPublishing = false,
@@ -125,7 +130,61 @@ export const DetailSidebar = ({
   return (
     <>
       <div className="col-span-12 lg:col-span-4 space-y-6">
-        <div className="bg-white dark:bg-[#111317] border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm overflow-hidden">
+        {/* Author Card(s) */}
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-[#111317] border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm transition-colors duration-300">
+            <h2 className="text-[10px] font-bold text-zinc-500 dark:text-[#8E9196] uppercase tracking-[0.2em] mb-4">
+              {resource.is_remix ? "Original Author" : "Primary Author"}
+            </h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                  <User size={20} className="text-zinc-500" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-zinc-900 dark:text-white truncate max-w-[120px]">
+                    {resource.is_remix ? resource.original_author_name : resource.owner_name}
+                  </span>
+                  <span className="text-[10px] font-medium text-zinc-500">
+                    @{resource.is_remix ? (resource.original_author_username || "archived") : resource.owner_username}
+                  </span>
+                </div>
+              </div>
+              {(resource.is_remix ? resource.original_author_username : resource.owner_username) && (
+                <Link 
+                  href={`/profile/${resource.is_remix ? resource.original_author_username : (resource.owner_username || resource.owner_id)}`}
+                  className="px-3 py-1.5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase rounded-lg hover:bg-emerald-500 dark:hover:bg-emerald-400 transition-all active:scale-95 shadow-sm"
+                >
+                  Profile
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {resource.is_remix && (
+            <div className="bg-zinc-50 dark:bg-[#0D0F12] border border-zinc-200 dark:border-[#1F2226] rounded-xl p-4 transition-colors duration-300">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 rounded-md">
+                    <RefreshCw size={12} />
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Remixed By</p>
+                    <p className="text-[11px] font-black text-zinc-900 dark:text-zinc-200">{resource.owner_name}</p>
+                  </div>
+                </div>
+                <Link 
+                  href={`/profile/${resource.owner_username || resource.owner_id}`}
+                  className="text-[9px] font-bold text-blue-600 hover:text-blue-700 uppercase"
+                >
+                  View Profile
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-[#111317] border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm overflow-hidden transition-colors duration-300">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-[10px] font-bold text-zinc-500 dark:text-[#8E9196] uppercase tracking-[0.2em]">
               Resource Content
@@ -175,7 +234,7 @@ export const DetailSidebar = ({
           </div>
 
           {/* Stats & Actions */}
-          <div className="grid grid-cols-3 gap-2 mt-8">
+          <div className="grid grid-cols-4 gap-2 mt-8">
             <button
               onClick={onLike}
               className={`flex flex-col items-center gap-1.5 py-3 rounded-lg border transition-all ${isLiked ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-500" : "bg-zinc-50 dark:bg-[#08090A] border-zinc-200 dark:border-[#1F2226] text-zinc-500 hover:border-zinc-300 dark:hover:border-[#2D3138]"}`}
@@ -197,6 +256,13 @@ export const DetailSidebar = ({
                 {downloadsCount}
               </span>
             </div>
+            <button
+              onClick={onShare}
+              className="flex flex-col items-center gap-1.5 py-3 rounded-lg bg-zinc-50 dark:bg-[#08090A] border border-zinc-200 dark:border-[#1F2226] text-zinc-500 hover:border-zinc-300 dark:hover:border-[#2D3138] transition-all"
+            >
+              <Share2 size={14} />
+              <span className="text-[10px] font-bold uppercase">Share</span>
+            </button>
           </div>
 
           <div className="space-y-3 mt-8">
@@ -237,6 +303,28 @@ export const DetailSidebar = ({
             >
               Download all assets
             </Button>
+
+            {isOwner && (
+              <Button
+                variant="ghost"
+                size="lg"
+                fullWidth
+                onClick={onDelete}
+                isLoading={isDeleting}
+                leftIcon={<Trash2 size={16} />}
+                className="text-rose-500 hover:text-white hover:bg-rose-500 border border-rose-500/20 hover:border-rose-500 transition-all font-bold mt-4"
+              >
+                Delete Resource
+              </Button>
+            )}
+
+            <button 
+              onClick={() => setIsReportModalOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 mt-4 text-[10px] font-bold text-zinc-400 hover:text-rose-500 hover:bg-rose-500/5 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-800 transition-all"
+            >
+              <Flag size={12} />
+              Report this resource
+            </button>
           </div>
         </div>
       </div>

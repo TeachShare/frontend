@@ -8,16 +8,27 @@ export interface DashboardStats {
   total_likes: number;
   followers_count: number;
   following_count: number;
+  period_resources: number;
+  period_likes: number;
+  roadmap?: {
+    profile_complete: boolean;
+    profile_completion_percentage: number;
+    resources_published: number;
+    resources_goal: number;
+    likes_received: number;
+    likes_goal: number;
+    is_verified: boolean;
+  }
 }
 
-const fetchDashboardStats = async (): Promise<DashboardStats> => {
-  const response = await api.get("/teachers/stats");
+const fetchDashboardStats = async (days: number): Promise<DashboardStats> => {
+  const response = await api.get(`/teachers/stats?days=${days}`);
   return response.data.data;
 };
 
-export const useDashboardStats = () => {
+export const useDashboardStats = (days: number = 30) => {
   return useQuery({
-    queryKey: ["dashboardStats"],
-    queryFn: fetchDashboardStats,
+    queryKey: ["dashboardStats", days],
+    queryFn: () => fetchDashboardStats(days),
   });
 };

@@ -4,7 +4,7 @@ export const educatorsData: Educator[] = [
   {
     name: "ABC",
     role: "Middle School Math · Curriculum Lead",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ABC",
+    avatar: null,
     resources: "56",
     followers: "1.2k",
     coTeaching: "14 projects",
@@ -16,7 +16,7 @@ export const educatorsData: Educator[] = [
   {
     name: "DEF",
     role: "High School Science · Lab Coordinator",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=DEF",
+    avatar: null,
     resources: "42",
     followers: "892",
     coTeaching: "7 projects",
@@ -28,7 +28,7 @@ export const educatorsData: Educator[] = [
   {
     name: "GHI",
     role: "Elementary Literacy · Instructional Coach",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=GHI",
+    avatar: null,
     resources: "68",
     followers: "2.1k",
     coTeaching: "21 projects",

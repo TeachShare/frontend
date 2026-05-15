@@ -29,20 +29,6 @@ export const GreetingCard = ({ lastName, role, institution, resourcesCount = 0 }
         {role ? `${role} at ${institution || 'TeachShare'}` : "Welcome back to your teaching dashboard."}
       </p>
 
-      <div className="flex flex-wrap gap-2 mt-6">
-        {[
-          `Resources: ${resourcesCount}`,
-          "Goal: 3 new uploads/week",
-        ].map((tag, idx) => (
-          <span
-            key={idx}
-            className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1 rounded-md text-[11px] font-bold text-zinc-600 dark:text-zinc-500 transition-colors duration-300"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-
       <div className="flex items-center space-x-4 mt-8">
         <button
           onClick={() => router.push("/resources/create")}

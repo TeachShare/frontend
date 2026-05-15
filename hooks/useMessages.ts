@@ -35,13 +35,23 @@ export const useSocket = () => {
 
     // Connect to Socket.io server
     const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1", "") || "http://localhost:5000";
+    console.log(`[Socket.io-Chat] Connecting to ${socketUrl}...`);
+    
     const socket = io(socketUrl, {
-        withCredentials: true
+        withCredentials: true,
+        transports: ['websocket', 'polling']
     });
     socketRef.current = socket;
 
-    // Join private room
-    socket.emit("join", { teacher_id: user.id });
+    socket.on("connect", () => {
+        console.log("[Socket.io-Chat] Connected. Joining room...");
+        // Join private room
+        socket.emit("join", { teacher_id: user.id });
+    });
+
+    socket.on("connect_error", (err) => {
+        console.error("[Socket.io-Chat] Connection error:", err.message);
+    });
 
     // Listen for new messages
     socket.on("new_message", (message) => {

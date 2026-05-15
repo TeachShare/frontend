@@ -399,7 +399,7 @@
                 </p>
                 </div>
                 <img
-                src={getAvatarUrl(user?.profile_image_url, user?.first_name, user?.id, 'avataaars')}
+                src={getAvatarUrl(user?.profile, user?.first_name, user?.id, 'avataaars')}
                 className="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-emerald-500 transition-colors"
                 alt="User"
                 />

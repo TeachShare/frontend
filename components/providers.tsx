@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
+import { Toaster } from "react-hot-toast";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   // We use useState to ensure the QueryClient is only created once per user session,
@@ -12,6 +13,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      <Toaster position="top-right" reverseOrder={false} />
       {/* This adds a little widget in the corner of your dev environment to see your data */}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

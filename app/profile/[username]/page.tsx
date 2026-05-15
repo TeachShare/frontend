@@ -293,7 +293,7 @@ const ProfileContent = () => {
                             [...Array(2)].map((_, i) => <SkeletonProfileResourceCard key={i} />)
                         ) : resources.length > 0 ? (
                             resources.map((resource: any) => (
-                                <ResourceCard key={resource.collection_id} resource={resource} />
+                                <ResourceCard key={resource.collection_id} {...resource} />
                             ))
                         ) : (
                             <div className="col-span-2 py-12 text-center text-zinc-500 dark:text-gray-500">No public resources found.</div>

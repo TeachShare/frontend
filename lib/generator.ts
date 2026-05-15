@@ -14,5 +14,18 @@ export const GeneratorAPI = {
   deleteContent: async (id: number) => {
     const response = await api.delete(`/ai/content/${id}`);
     return response.data;
+  },
+
+  analyzeDocument: async (files: File[]) => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    const response = await api.post('/ai/analyze-document', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   }
 };

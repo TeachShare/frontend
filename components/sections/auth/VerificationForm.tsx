@@ -12,8 +12,7 @@ interface Props {
 }
 
 export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Props) => {
-  // Adjusted to 8 digits for Supabase compatibility
-  const [code, setCode] = useState<string[]>(["", "", "", "", "", "", "", ""]);
+  const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
 
@@ -35,15 +34,15 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
 
     // Handle multi-character input (like paste or fast typing)
     if (value.length > 1) {
-      const pastedCode = value.slice(0, 8).split("");
-      for (let i = 0; i < 8; i++) {
+      const pastedCode = value.slice(0, 6).split("");
+      for (let i = 0; i < 6; i++) {
         if (pastedCode[i]) newCode[i] = pastedCode[i];
       }
       setCode(newCode);
 
       // Focus appropriate box
-      const nextIndex = Math.min(newCode.findIndex(v => v === ""), 7);
-      const focusIndex = nextIndex === -1 ? 7 : nextIndex;
+      const nextIndex = Math.min(newCode.findIndex(v => v === ""), 5);
+      const focusIndex = nextIndex === -1 ? 5 : nextIndex;
       inputRefs.current[focusIndex]?.focus();
       
       // Auto-submit if complete
@@ -57,12 +56,12 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
     setCode(newCode);
 
     // Auto-advance
-    if (value !== "" && index < 7) {
+    if (value !== "" && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-submit if this was the last digit and code is complete
-    if (value !== "" && index === 7 && newCode.every(v => v !== "")) {
+    if (value !== "" && index === 5 && newCode.every(v => v !== "")) {
        submitVerification(newCode.join(""));
     }
   };
@@ -89,8 +88,8 @@ export const VerificationForm = ({ userEmail, teacherId, token, onSuccess }: Pro
     try {
       let finalTeacherId = teacherId;
 
-      // Fallback to cookie if prop is missing (e.g. initial load race condition)
-      if (!finalTeacherId && !token) {
+      // Fallback to cookie if prop is missing
+      if (!finalTeacherId) {
         const cookies = document.cookie.split("; ");
         const cookieId = cookies
             .find((row) => row.startsWith("teacher_id="))

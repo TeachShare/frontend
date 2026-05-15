@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -16,8 +17,8 @@
   }
 }
 
-/* Custom styles for Tiptap Editor */
-.tiptap {
+/* Custom styles for Tiptap Editor & Display */
+.tiptap, .rich-text-content {
   /* Bullet Lists */
   ul {
     list-style-type: disc !important;
@@ -34,28 +35,13 @@
   li {
     margin-bottom: 0.5rem;
     padding-left: 0.5rem;
+    display: list-item !important; /* Force display as list item */
   }
 
-  /* Nested Lists */
-  ul ul, ol ol, ul ol, ol ul {
-    margin: 0.5rem 1rem !important;
-  }
-
-  /* Task Lists (if you add them later) */
-  ul[data-type="taskList"] {
-    list-style: none !important;
-    padding: 0;
-    
-    li {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      
-      input[type="checkbox"] {
-        margin-top: 0.3rem;
-        cursor: pointer;
-      }
-    }
+  /* Fix for nested p in li */
+  li p {
+    margin: 0 !important;
+    display: inline; /* Keep text inline with bullet */
   }
 
   /* Headings */
@@ -66,6 +52,13 @@
     margin-bottom: 0.75rem;
   }
 
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
   /* Quotes */
   blockquote {
     border-left: 3px solid var(--color-emerald-500);
@@ -74,4 +67,9 @@
     color: var(--color-zinc-500);
     margin: 1.5rem 0;
   }
+}
+
+/* Ensure spans with inline font-size are respected */
+.rich-text-content span[style*="font-size"] {
+  line-height: 1.2;
 }

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Eye, Download, RefreshCw, Star, CheckCircle2 } from "lucide-react";
+import { Eye, Download, RefreshCw, Star, CheckCircle2, Edit3, GitBranch } from "lucide-react";
 import Link from "next/link";
 
 interface Props {
@@ -14,6 +14,11 @@ interface Props {
 export const RepositoryItemCard = ({ data, onRemix, onDownload, onPreview }: Props) => {
   const router = useRouter();
   
+  const handleEditProposal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const slug = `${data.collection_id}-${data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+    router.push(`/resources/create?edit=${slug}`);
+  };
   return (
     <div className="bg-white dark:bg-[#0D0F12] border border-zinc-200 dark:border-[#1F2226] rounded-xl p-5 group hover:border-emerald-500/30 transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-full">
       <div>
@@ -33,6 +38,12 @@ export const RepositoryItemCard = ({ data, onRemix, onDownload, onPreview }: Pro
         
         <p className="text-[11px] text-zinc-500 font-medium mb-6">
             {data.subject} • {data.grade} • {data.type}
+            {data.is_remix && data.original_author_name && (
+                <span className="flex items-center gap-1 mt-1.5 text-blue-500 dark:text-blue-400 font-bold uppercase text-[9px] tracking-tight">
+                    <GitBranch size={10} />
+                    Remixed from {data.original_author_name}
+                </span>
+            )}
         </p>
 
         {/* Stats Pipeline */}
@@ -80,6 +91,17 @@ export const RepositoryItemCard = ({ data, onRemix, onDownload, onPreview }: Pro
         >
           Explore
         </button>
+
+        {data.collaboration_mode === 'everyone' && (
+          <button 
+            onClick={handleEditProposal}
+            className="p-2.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all"
+            title="Propose Changes"
+          >
+            <Edit3 size={16} />
+          </button>
+        )}
+
         <button 
           onClick={!!data.allow_remixing ? onRemix : undefined}
           disabled={!data.allow_remixing}

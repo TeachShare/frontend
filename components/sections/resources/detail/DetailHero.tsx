@@ -1,17 +1,36 @@
 import React from "react";
-import { RefreshCw, Star } from "lucide-react";
+import { RefreshCw, Star, GitBranch } from "lucide-react";
 import { ResourceDetail } from "@/types/resources";
+import Link from "next/link";
 
 interface Props {
   resource: ResourceDetail;
 }
 
 export const DetailHero = ({ resource }: Props) => {
-  console.log(resource);
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
-        <div className="space-y-2">
+        <div className="space-y-3">
+          {/* Citation / Remix Badge */}
+          {resource.is_remix && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-900/30 rounded-lg w-fit transition-colors duration-300">
+               <GitBranch size={12} className="text-blue-500 dark:text-blue-400" />
+               <p className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">
+                 Remixed from: {" "}
+                 {resource.parent_version_id ? (
+                    <span className="text-blue-900 dark:text-blue-200">
+                      {resource.original_author_name}&apos;s &quot;{resource.original_resource_title}&quot;
+                    </span>
+                 ) : (
+                    <span className="text-zinc-500 italic">
+                       {resource.original_author_name}&apos;s &quot;{resource.original_resource_title}&quot; (Archived)
+                    </span>
+                 )}
+               </p>
+            </div>
+          )}
+
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight transition-colors duration-300">
               {resource.title}

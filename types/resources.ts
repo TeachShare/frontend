@@ -36,14 +36,23 @@ export interface ResourceDetail {
   estimate_duration: string | null;
   files: ResourceFile[];
   is_published: boolean;
+  version_id?: number;
   version_no: number;
   is_latest: boolean;
+  is_approved?: boolean;
+  version_creator_name?: string;
   updated_at: string;
   student_summary: string | null;
   allow_remixing: boolean;
   visibility: string;
   collaboration_mode: string;
   collaborators: Collaborator[];
+  
+  // Citation
+  is_remix?: boolean;
+  original_author_name?: string;
+  original_resource_title?: string;
+  parent_version_id?: number;
 }
 
 export interface Collaborator {

@@ -21,13 +21,24 @@ export const useNotifications = () => {
     if (!user?.id) return;
 
     const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1", "") || "http://localhost:5000";
+    console.log(`[Socket.io] Connecting to ${socketUrl}...`);
+    
     const socket = io(socketUrl, {
-      withCredentials: true
+      withCredentials: true,
+      transports: ['websocket', 'polling'], // Allow fallback but prefer websocket
     });
 
-    socket.emit("join", { teacher_id: user.id });
+    socket.on("connect", () => {
+      console.log("[Socket.io] Connected successfully. Joining room...");
+      socket.emit("join", { teacher_id: user.id });
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("[Socket.io] Connection error:", err.message);
+    });
 
     socket.on("new_notification", (notification) => {
+      console.log("[Socket.io] New notification received:", notification);
       // Update notifications list
       queryClient.setQueryData(["notifications"], (old: any) => {
         if (!old) return old;

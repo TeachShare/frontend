@@ -89,15 +89,18 @@ export const ResourceSettingsForm = ({
   return (
     <div className="space-y-6">
       {/* General Settings */}
-      <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 transition-colors duration-300">
+      <div className={`bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 transition-colors duration-300 ${!isOwner ? 'opacity-60 grayscale-[0.5]' : ''}`}>
         <div className="flex items-center gap-2 mb-6">
           <Settings2 size={16} className="text-emerald-500" />
           <h2 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
             Resource Settings
           </h2>
+          {!isOwner && (
+            <span className="ml-auto text-[9px] font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-1.5 py-0.5 rounded uppercase">Owner Only</span>
+          )}
         </div>
 
-        <div className="space-y-6">
+        <div className={`space-y-6 transition-opacity duration-300 ${!isOwner ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
           <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/50 rounded-lg border border-zinc-100 dark:border-zinc-800/40">
             <div className="space-y-0.5">
               <p className="text-xs font-bold text-zinc-900 dark:text-zinc-200">Allow Remixing</p>
@@ -145,6 +148,7 @@ export const ResourceSettingsForm = ({
                 >
                   <option value="none">None</option>
                   <option value="invite_only">Invite Only</option>
+                  <option value="everyone">Everyone (Open Wiki)</option>
                 </select>
                 <Shield size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
               </div>
@@ -154,15 +158,21 @@ export const ResourceSettingsForm = ({
       </div>
 
       {/* Collaborator Management */}
-      <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 transition-colors duration-300">
+      <div className={`bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 transition-colors duration-300 ${!isOwner || formData.collaboration_mode !== 'invite_only' ? 'opacity-60 grayscale-[0.5]' : ''}`}>
         <div className="flex items-center gap-2 mb-6">
           <Users size={16} className="text-blue-500" />
           <h2 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
             Collaborators
           </h2>
+          {!isOwner && (
+            <span className="ml-auto text-[9px] font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-1.5 py-0.5 rounded uppercase">Owner Only</span>
+          )}
+          {isOwner && formData.collaboration_mode !== 'invite_only' && (
+            <span className="ml-auto text-[9px] font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-1.5 py-0.5 rounded uppercase">Only available in 'Invite Only' mode</span>
+          )}
         </div>
 
-        <div className={`space-y-6 transition-opacity duration-300 ${formData.collaboration_mode === 'none' ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+        <div className={`space-y-6 transition-opacity duration-300 ${formData.collaboration_mode !== 'invite_only' || !isOwner ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
           {/* Search box */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />

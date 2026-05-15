@@ -4,6 +4,7 @@ import { X, Download, RefreshCw, FileText, CheckCircle2, Shield, Calendar, BookO
 import { api } from "@/lib/axios";
 import { saveAs } from 'file-saver';
 import { useTheme } from "next-themes";
+import { unescapeHtml } from "@/lib/utils";
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 import "@cyntler/react-doc-viewer/dist/index.css"; 
 
@@ -99,12 +100,10 @@ export const QuickPreviewModal = ({ isOpen, onClose, resource, onRemix, onDownlo
                         </div>
                     </div>
 
-                    <div className="prose dark:prose-invert prose-sm max-w-none prose-zinc">
-                        <div 
-                           className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium"
-                           dangerouslySetInnerHTML={{ __html: resource.description || "No description provided." }}
-                        />
-                    </div>
+                    <div 
+                        className="prose prose-sm dark:prose-invert max-w-none rich-text-content"
+                        dangerouslySetInnerHTML={{ __html: unescapeHtml(resource.description) || "No description provided." }}
+                    />
 
                     <div className="flex flex-wrap gap-2 pt-4">
                         {resource.tags?.map((tag: string, i: number) => (

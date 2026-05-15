@@ -4,7 +4,7 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { ResourceCardProps } from "@/types/resources";
 import { api } from "@/lib/axios"; 
-import { Loader2, Trash2, AlertTriangle, X, FileText, Eye, Edit3 } from "lucide-react"; 
+import { Loader2, Trash2, AlertTriangle, X, FileText, Eye, Edit3, GitBranch } from "lucide-react"; 
 import { toast } from "react-hot-toast";
 
 interface ExtendedResourceCardProps extends ResourceCardProps {
@@ -16,6 +16,8 @@ interface ExtendedResourceCardProps extends ResourceCardProps {
   like_count?: number;
   download_count?: number; 
   is_collaborator?: boolean;
+  is_remix?: boolean;
+  original_author_name?: string;
 }
 
 export const ResourceCard = ({
@@ -32,6 +34,8 @@ export const ResourceCard = ({
   status,
   collection_id, 
   is_collaborator,
+  is_remix,
+  original_author_name,
   is_selected,
   viewMode = 'grid'
 }: ExtendedResourceCardProps & { is_selected?: boolean, viewMode?: 'grid' | 'list', weekly_likes?: number }) => {
@@ -154,7 +158,10 @@ export const ResourceCard = ({
                      <h4 className="text-sm font-bold text-zinc-900 dark:text-white truncate">{title}</h4>
                      {is_collaborator && <span className="bg-blue-500/10 text-blue-600 text-[7px] font-black px-1 py-0.5 rounded uppercase border border-blue-500/20">Shared</span>}
                   </div>
-                  <p className="text-[10px] text-zinc-500 truncate">{category} • {grade} • {type}</p>
+                  <p className="text-[10px] text-zinc-500 truncate">
+                    {category} • {grade} • {type} 
+                    {is_remix && original_author_name && ` • Remixed from ${original_author_name}`}
+                  </p>
                </div>
             </div>
 
@@ -210,6 +217,13 @@ export const ResourceCard = ({
           <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-3 truncate">
             {category || "Subject"} {grade && `· ${grade}`} · {type || "Resource"}
           </p>
+
+          {is_remix && original_author_name && (
+            <div className="flex items-center gap-1.5 mb-3 text-blue-600 dark:text-blue-400/80">
+               <GitBranch size={10} />
+               <span className="text-[10px] font-bold uppercase tracking-tight truncate">Remixed from {original_author_name}</span>
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-1.5 mb-4">
             {tags.slice(0, 3).map((tag, i) => (

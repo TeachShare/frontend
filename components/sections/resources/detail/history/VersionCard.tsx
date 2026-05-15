@@ -1,11 +1,12 @@
 import React from "react";
-import { User, Clock, FileText, ArrowRightLeft, Eye } from "lucide-react";
+import { User, Clock, FileText, ArrowRightLeft, Eye, XCircle } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 
 interface Props {
   version: any;
   isLast: boolean;
   isLatest: boolean;
+  isOwner?: boolean;
   onRestore: () => void;
   disabled?: boolean;
 }
@@ -14,6 +15,7 @@ export const VersionCard = ({
   version: v,
   isLast,
   isLatest,
+  isOwner = false,
   onRestore,
   disabled,
 }: Props) => {
@@ -61,23 +63,31 @@ export const VersionCard = ({
           <div className="flex items-center gap-3">
             <h4 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-tight">
               v{v.version_no} ·{" "}
-              {isLatest ? "Current Version" : "Archive Snapshot"}
+              {isLatest ? "Current Version" : v.is_approved ? "Archive Snapshot" : "Proposed Changes"}
             </h4>
             <span
               className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-widest ${
                 isLatest
                   ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
+                  : !v.is_approved
+                  ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"
                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
               }`}
             >
-              {isLatest ? "Active" : "Immutable"}
+              {isLatest ? "Active" : !v.is_approved ? "Pending Review" : "Immutable"}
             </span>
           </div>
 
-          <div className="bg-zinc-50 dark:bg-zinc-900/50 p-3 rounded-lg border border-zinc-100 dark:border-zinc-800/50">
+          <div className={`p-3 rounded-lg border ${!v.is_approved ? 'bg-amber-50/50 dark:bg-amber-500/5 border-amber-100 dark:border-amber-800/30' : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800/50'}`}>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed italic">
               "{v.notes || "No revision notes provided for this snapshot."}"
             </p>
+            {!v.is_approved && (
+              <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-2 font-bold uppercase tracking-wider flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                Draft: Requires owner approval to publish
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-4 text-[11px] text-zinc-500 font-medium">
@@ -116,17 +126,32 @@ export const VersionCard = ({
             </button>
           </div>
 
-          {!isLatest && (
+          {!isLatest && v.is_approved && (
+            isOwner ? (
+              <button
+                onClick={onRestore}
+                disabled={disabled}
+                className={`w-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 py-2 rounded font-bold text-[11px] transition-all ${
+                  disabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-emerald-200 dark:hover:bg-emerald-500/20"
+                }`}
+              >
+                {disabled ? "Processing..." : "Restore this version"}
+              </button>
+            ) : (
+              <div className="w-full bg-zinc-100 dark:bg-zinc-800/50 text-zinc-400 border border-zinc-200 dark:border-zinc-800 py-2 rounded font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-not-allowed">
+                 <XCircle size={12} /> Restore Restricted
+              </div>
+            )
+          )}
+
+          {!v.is_approved && (
             <button
-              onClick={onRestore}
-              disabled={disabled}
-              className={`w-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 py-2 rounded font-bold text-[11px] transition-all ${
-                disabled
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-emerald-200 dark:hover:bg-emerald-500/20"
-              }`}
+              onClick={() => router.push(`/resources/${params.id}/history/compare?with=${v.version_no}`)}
+              className="w-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 py-2 rounded font-bold text-[11px] transition-all hover:bg-amber-200 dark:hover:bg-amber-500/20 flex items-center justify-center gap-2"
             >
-              {disabled ? "Processing..." : "Restore this version"}
+              <ArrowRightLeft size={12} /> Review Proposal
             </button>
           )}
         </div>

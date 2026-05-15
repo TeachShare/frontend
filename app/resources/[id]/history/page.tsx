@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { ChevronDown, Loader2, AlertCircle } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { api } from "@/lib/axios";
+import { useUser } from "@/hooks/useUser";
 
 // Components
 import { HistoryHeader } from "@/components/sections/resources/detail/history/HistoryHeader";
@@ -20,6 +21,10 @@ const VersionHistoryPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(false);
+
+  const { data: user } = useUser();
+  const isOwner = user && versions.length > 0 && versions[0].owner_id === user.id;
+
    const fetchHistory = async (showLoader = true) => {
       if (!collectionId) return;
       
@@ -131,6 +136,7 @@ const VersionHistoryPage = () => {
                     version={version}
                     isLast={i === versions.length - 1}
                     isLatest={version.is_latest}
+                    isOwner={isOwner}
                     onRestore={() => handleRestore(version.version_id)}
                     disabled={isRestoring}
                   />

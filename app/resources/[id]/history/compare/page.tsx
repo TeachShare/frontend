@@ -19,7 +19,8 @@ import {
   Shield,
   Eye,
   Activity,
-  Columns2
+  Columns2,
+  XCircle
 } from "lucide-react";
 import { saveAs } from 'file-saver'; 
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
@@ -27,11 +28,16 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import { useTheme } from "next-themes"; // Added useTheme import
 
+import { toast } from "react-hot-toast";
+import { useUser } from "@/hooks/useUser";
+import { Button } from "@/components/ui/Button";
+
 const CompareVersionsPage = () => {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
   const { resolvedTheme } = useTheme(); // Hooked next-themes
+  const { data: user } = useUser();
   
   // Extract base ID from the URL (e.g., "38-lesson-plan" -> "38")
   const currentId = typeof params.id === 'string' ? params.id.split("-")[0] : null;
@@ -40,47 +46,83 @@ const CompareVersionsPage = () => {
   const [allVersions, setAllVersions] = useState<any[]>([]);
   const [compareData, setCompareData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isApproving, setIsSaving] = useState(false);
   const [sideBySideFiles, setSideBySideFiles] = useState<{ v1: any; v2: any } | null>(null);
 
-  useEffect(() => { 
-    const fetchLineage = async () => {
-      if (!currentId) return;
-      try {
-        setLoading(true);
-        // 1. Get the full list of all versions for the sidebar
-        const historyRes = await api.get(`/resource_collection/${currentId}/history`);
-        const versions = historyRes.data.data;
-        setAllVersions(versions);
+  const fetchLineage = async () => {
+    if (!currentId) return;
+    try {
+      setLoading(true);
+      // 1. Get the full list of all versions for the sidebar
+      const historyRes = await api.get(`/resource_collection/${currentId}/history`);
+      const versions = historyRes.data.data;
+      setAllVersions(versions);
 
-        // 2. Fetch the comparison between the selected version number and the current (latest)
-        // If no "with" is provided, default to the second newest version
-        const v1_no = compareWithVersion || versions[1]?.version_no;
-        const v2_no = versions[0]?.version_no; // Latest
-        
-        if (v1_no && v2_no) {
-          // If trying to compare the same version, handle gracefully
-          if (String(v1_no) === String(v2_no)) {
-            // If we have at least 2 versions, default to v[1] vs v[0]
-            if (versions.length > 1) {
-              const compRes = await api.get(`/resource_collection/compare/${currentId}?v1=${versions[1].version_no}&v2=${v2_no}`);
-              setCompareData(compRes.data);
-            } else {
-              // Only one version exists
-              setCompareData(null);
-            }
-          } else {
-            const compRes = await api.get(`/resource_collection/compare/${currentId}?v1=${v1_no}&v2=${v2_no}`);
+      // 2. Fetch the comparison between the selected version number and the current (latest)
+      // If no "with" is provided, default to the second newest version
+      const v1_no = compareWithVersion || versions[1]?.version_no;
+      const v2_no = versions[0]?.version_no; // Latest
+      
+      if (v1_no && v2_no) {
+        // If trying to compare the same version, handle gracefully
+        if (String(v1_no) === String(v2_no)) {
+          // If we have at least 2 versions, default to v[1] vs v[0]
+          if (versions.length > 1) {
+            const compRes = await api.get(`/resource_collection/compare/${currentId}?v1=${versions[1].version_no}&v2=${v2_no}`);
             setCompareData(compRes.data);
+          } else {
+            // Only one version exists
+            setCompareData(null);
           }
+        } else {
+          const compRes = await api.get(`/resource_collection/compare/${currentId}?v1=${v1_no}&v2=${v2_no}`);
+          setCompareData(compRes.data);
         }
-      } catch (err) {
-        console.error("Comparison Error:", err);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Comparison Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { 
     fetchLineage();
   }, [currentId, compareWithVersion]);
+
+  const handleApprove = async () => {
+    if (!compareData?.v1?.version_id) return;
+    try {
+      setIsSaving(true);
+      const res = await api.post(`/resource_collection/${currentId}/approve/${compareData.v1.version_id}`);
+      if (res.data.success) {
+        toast.success("Version approved and published!");
+        router.push(`/resources/${params.id}/history`);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Approval failed");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!compareData?.v1?.version_id) return;
+    if (!window.confirm("Are you sure you want to reject these proposed changes? This will delete this version permanently.")) return;
+    
+    try {
+      setIsSaving(true);
+      const res = await api.post(`/resource_collection/${currentId}/reject/${compareData.v1.version_id}`);
+      if (res.data.success) {
+        toast.success("Proposal rejected and removed.");
+        router.push(`/resources/${params.id}/history`);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Rejection failed");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const selectForComparison = (v_no: number) => {
     // If selecting the current latest version, we can either do nothing or toast
@@ -147,18 +189,55 @@ const CompareVersionsPage = () => {
           ) : compareData && (
             <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
               <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold flex items-center gap-3">
-                  <ArrowLeftRight className="text-blue-600" /> Comparison Workspace
-                </h1>
-                <div className="bg-zinc-100 dark:bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-4">
-                   <div className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase">Added</span>
-                   </div>
-                   <div className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase">Removed</span>
-                   </div>
+                <div className="space-y-1">
+                  <h1 className="text-xl font-bold flex items-center gap-3">
+                    <ArrowLeftRight className="text-blue-600" /> Comparison Workspace
+                  </h1>
+                  {!compareData.v1.is_approved && (
+                    <div className="flex items-center gap-2">
+                       <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                       <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Reviewing Proposed Changes</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  {user && compareData.owner_id === user.id && !compareData.v1.is_approved && (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleReject}
+                        isLoading={isApproving}
+                        leftIcon={<XCircle size={14} />}
+                        className="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-rose-500/20"
+                      >
+                        Reject Proposal
+                      </Button>
+
+                      <Button 
+                        variant="emerald" 
+                        size="sm" 
+                        onClick={handleApprove}
+                        isLoading={isApproving}
+                        leftIcon={<CheckCircle2 size={14} />}
+                        className="shadow-emerald-500/20"
+                      >
+                        Approve & Publish Changes
+                      </Button>
+                    </>
+                  )}
+                  
+                  <div className="bg-zinc-100 dark:bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase">Added</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase">Removed</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

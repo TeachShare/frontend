@@ -13,8 +13,10 @@ import { ResourceSettingsForm } from "@/components/sections/resources/create/Res
 import { RichTextEditor } from "@/components/sections/resources/create/RichTextEditor";
 import { FileUploader } from "@/components/sections/resources/create/FileUploader";
 import { PublishSidebar } from "@/components/sections/resources/create/PublishSidebar";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Loader2, AlertCircle, Wand2 } from "lucide-react";
 import { SkeletonCreatorWorkspace } from "@/components/sections/resources/create/CreatorSkeletons";
+import { GeneratorAPI } from "@/lib/generator";
 
 const TOAST_STYLE = {
   style: {
@@ -53,6 +55,7 @@ const CreateResourceContent = () => {
 
   const [isFetchingData, setIsFetchingData] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [resource, setResource] = useState<any>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [existingFiles, setExistingFiles] = useState<any[]>([]);
@@ -74,6 +77,79 @@ const CreateResourceContent = () => {
     collaboration_mode: "none",
     student_summary: "",
   });
+
+  const handleMagicFill = async () => {
+    if (attachedFiles.length === 0) {
+      toast.error("UPLOAD REQUIRED: Please attach a document (PDF, Word, or PowerPoint) first so AI can read it.", TOAST_STYLE);
+      return;
+    }
+    
+    try {
+      setIsAnalyzing(true);
+      const res = await GeneratorAPI.analyzeDocument(attachedFiles);
+      
+      if (res.success) {
+        const ai = res.data;
+        
+        // 1. High-Precision Subject Matcher (AI is now aware of valid options)
+        const matchedSubject = metadata?.subjects?.find(
+          (s: any) => s.name.toLowerCase() === ai.subject?.toLowerCase()
+        ) || metadata?.subjects?.find(
+          (s: any) => s.name.toLowerCase().includes(ai.subject?.toLowerCase()) || 
+                      ai.subject?.toLowerCase().includes(s.name.toLowerCase())
+        );
+        
+        // 2. High-Precision Grade Matcher
+        const matchedGrade = metadata?.grade_levels?.find(
+          (g: any) => g.name.toLowerCase() === ai.grade?.toLowerCase()
+        ) || metadata?.grade_levels?.find(
+          (g: any) => g.name.toLowerCase().includes(ai.grade?.toLowerCase()) || 
+                      ai.grade?.toLowerCase().includes(g.name.toLowerCase())
+        );
+
+        // 3. High-Precision Resource Type Matcher
+        const matchedType = metadata?.content_types?.find(
+          (t: any) => t.name.toLowerCase() === ai.type?.toLowerCase()
+        ) || metadata?.content_types?.find(
+          (t: any) => t.name.toLowerCase().includes(ai.type?.toLowerCase()) || 
+                      ai.type?.toLowerCase().includes(t.name.toLowerCase())
+        );
+
+        // 4. Parse Duration (e.g., "45 Minutes" -> ["45", "Minutes"])
+        let durationVal = "";
+        let durationUnit = "Minutes";
+        if (ai.duration) {
+          const parts = ai.duration.split(" ");
+          if (parts.length >= 1) durationVal = parts[0];
+          if (parts.length >= 2) {
+             const unit = parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase();
+             if (["Minutes", "Hours", "Days", "Weeks"].includes(unit)) {
+                durationUnit = unit;
+             }
+          }
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          title: ai.title || prev.title,
+          description: ai.description ? `<p>${ai.description}</p>` : prev.description,
+          tags: ai.tags || prev.tags,
+          subject_id: matchedSubject ? matchedSubject.id.toString() : prev.subject_id,
+          grade_level_id: matchedGrade ? matchedGrade.id.toString() : prev.grade_level_id,
+          content_type_id: matchedType ? matchedType.id.toString() : prev.content_type_id,
+          duration_value: durationVal || prev.duration_value,
+          duration_unit: durationUnit || prev.duration_unit
+        }));
+
+        toast.success("MAGIC FILL: Form populated from document content.", TOAST_STYLE);
+      }
+    } catch (err: any) {
+      console.error("Magic fill error:", err);
+      toast.error("Analysis failed. Please fill manually.", TOAST_STYLE);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   // 2. Fetch Data for Edit Mode
   const fetchResourceData = async () => {
@@ -205,6 +281,15 @@ const CreateResourceContent = () => {
         );
         return;
       }
+
+      const totalFiles = attachedFiles.length + (existingFiles.length - removedFileUrls.length);
+      if (totalFiles === 0) {
+        toast.error(
+          "MISSING ASSETS: Please attach at least one file before publishing.",
+          TOAST_STYLE,
+        );
+        return;
+      }
     } else if (!formData.title) {
       toast.error("TITLE REQUIRED: Enter a title to save a draft.", TOAST_STYLE);
       return;
@@ -318,6 +403,31 @@ const CreateResourceContent = () => {
           <div className="grid grid-cols-12 gap-8 pb-20">
             {/* Left Column */}
             <div className="col-span-12 lg:col-span-8 space-y-6">
+              
+              {/* Magic Fill Button - Always visible for new resources */}
+              {!isEditMode && (
+                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 flex items-center justify-between animate-in slide-in-from-top-2 duration-300">
+                   <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-500 text-white rounded-lg shadow-lg shadow-emerald-500/20">
+                         <Wand2 size={18} />
+                      </div>
+                      <div className="flex flex-col">
+                         <p className="text-xs font-black text-emerald-900 dark:text-emerald-400 uppercase tracking-widest">Magic Auto-fill</p>
+                         <p className="text-[10px] text-emerald-700 dark:text-emerald-500/80 font-medium">Click to automatically populate form from your uploaded document.</p>
+                      </div>
+                   </div>
+                   <Button 
+                    variant={attachedFiles.length > 0 ? "emerald" : "outline"}
+                    size="sm" 
+                    onClick={handleMagicFill}
+                    isLoading={isAnalyzing}
+                    leftIcon={<Wand2 size={14} />}
+                   >
+                     {isAnalyzing ? "Analyzing..." : "Auto-fill Form"}
+                   </Button>
+                </div>
+              )}
+
               <ResourceForm
                 formData={formData}
                 handleChange={handleChange}

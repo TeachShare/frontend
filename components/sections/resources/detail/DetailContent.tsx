@@ -1,6 +1,7 @@
 import React from "react";
 import { History, ChevronDown } from "lucide-react";
 import { ResourceDetail } from "@/types/resources";
+import { unescapeHtml } from "@/lib/utils";
 
 interface Props {
   resource: ResourceDetail;
@@ -83,15 +84,10 @@ export const DetailContent = ({ resource }: Props) => {
               Overview
             </h3>
             
-            {/* --- UPDATED: Dynamic Rich Text Rendering --- */}
+            {/* --- UPDATED: Dynamic Rich Text Rendering with Typography & Fixes --- */}
             <div 
-              className="text-zinc-600 dark:text-zinc-400 text-[13px] leading-relaxed transition-colors duration-300 
-                         [&>p]:mb-3 last:[&>p]:mb-0 
-                         [&>strong]:text-zinc-900 dark:[&>strong]:text-white [&>strong]:font-bold 
-                         [&>em]:italic 
-                         [&>ul]:list-disc [&>ul]:list-inside [&>ul]:mb-3 [&>ul>li]:mb-1
-                         [&>ol]:list-decimal [&>ol]:list-inside [&>ol]:mb-3 [&>ol>li]:mb-1"
-              dangerouslySetInnerHTML={{ __html: resource.description || "<p>No description provided.</p>" }}
+              className="prose prose-sm dark:prose-invert max-w-none rich-text-content"
+              dangerouslySetInnerHTML={{ __html: unescapeHtml(resource.description) || "<p>No description provided.</p>" }}
             />
           </div>
 

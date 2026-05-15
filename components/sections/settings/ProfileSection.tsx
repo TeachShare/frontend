@@ -16,29 +16,54 @@ export const ProfileSection = () => {
   
   const [formData, setFormData] = useState({
     role: "",
-    institution: "",
     bio: ""
   });
+
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (user) {
       setFormData({
         role: user.role || "",
-        institution: user.institution || "",
         bio: user.bio || ""
       });
     }
   }, [user]);
+
+  // Dirty checking: Compare current formData with initial user data
+  useEffect(() => {
+    if (user) {
+      const hasChanged = 
+        formData.role !== (user.role || "") ||
+        formData.bio !== (user.bio || "");
+      setIsDirty(hasChanged);
+    }
+  }, [formData, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const validateForm = () => {
+    if (formData.role.length > 100) {
+      toast.error("Role must be less than 100 characters.");
+      return false;
+    }
+    if (formData.bio.length > 500) {
+      toast.error("Bio must be less than 500 characters.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSave = () => {
+    if (!validateForm()) return;
+
     updateProfile.mutate(formData, {
       onSuccess: () => {
         toast.success("Profile updated successfully!");
+        setIsDirty(false);
       },
       onError: (error: any) => {
         toast.error(error.message || "Failed to update profile.");
@@ -66,9 +91,7 @@ export const ProfileSection = () => {
   };
 
   const handleRemovePhoto = () => {
-    // Reset to default Dicebear avatar
-    const defaultAvatar = getAvatarUrl(null, user?.first_name || "User", user?.id);
-    updateProfile.mutate({ ...formData, profile_image_url: defaultAvatar }, {
+    updateProfile.mutate({ ...formData, profile_image_url: null }, {
       onSuccess: () => {
         toast.success("Profile photo removed.");
       }
@@ -97,8 +120,12 @@ export const ProfileSection = () => {
         <div className="flex items-center gap-3">
             <button 
                 onClick={handleSave}
-                disabled={updateProfile.isPending}
-                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                disabled={updateProfile.isPending || !isDirty}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                  isDirty 
+                  ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" 
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
+                }`}
             >
                 {updateProfile.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                 {updateProfile.isPending ? "Saving..." : "Save Changes"}
@@ -197,6 +224,7 @@ export const ProfileSection = () => {
             <input
               type="text"
               name="role"
+              maxLength={100}
               value={formData.role}
               onChange={handleChange}
               placeholder="e.g. Mathematics Teacher"
@@ -205,28 +233,26 @@ export const ProfileSection = () => {
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold text-zinc-600 dark:text-zinc-500 transition-colors duration-300">
-              School/Organization
+              School / Organization
             </label>
             <input
               type="text"
-              name="institution"
-              value={formData.institution}
-              onChange={handleChange}
-              placeholder="e.g. Oak Ridge High School"
-              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-[13px] text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition-colors duration-300"
+              readOnly
+              value={user?.institution || "Not specified"}
+              className="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-[13px] text-zinc-500 dark:text-zinc-500 cursor-not-allowed transition-colors duration-300"
             />
           </div>
           <div className="md:col-span-2 space-y-2">
             <label className="text-xs font-bold text-zinc-600 dark:text-zinc-500 flex justify-between transition-colors duration-300">
               <span>Bio</span>
-              <span className="text-[10px] font-normal italic text-zinc-500 dark:text-zinc-600">
-                1-2 sentences about your teaching context and what you love
-                sharing.
+              <span className={`text-[10px] font-bold ${formData.bio.length > 450 ? "text-rose-500" : "text-zinc-500"}`}>
+                {formData.bio.length}/500
               </span>
             </label>
             <textarea
               rows={3}
               name="bio"
+              maxLength={500}
               value={formData.bio}
               onChange={handleChange}
               placeholder="Tell other educators about yourself..."

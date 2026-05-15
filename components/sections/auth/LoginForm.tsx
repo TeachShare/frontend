@@ -20,7 +20,7 @@ const toastStyle = {
   },
 };
 
-export const LoginForm = () => {
+export const LoginForm = ({ onForgotPassword }: { onForgotPassword: () => void }) => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,10 +45,10 @@ export const LoginForm = () => {
         {
           loading: "Signing you in...",
           success: (data) => {
-          
             if(!data.is_verified && data.verification_token){
                 router.push(`/verification/${data.verification_token}`);
-                return "Please verify your account to continue."
+                // Return a string to update the existing loading toast instead of creating a new one
+                return "Verification required.";
             }
 
             router.push("/dashboard");
@@ -102,7 +102,11 @@ export const LoginForm = () => {
             Remember me
           </span>
         </label>
-        <button type="button" className="text-[13px] text-blue-600 dark:text-[#58a6ff] hover:text-blue-700 dark:hover:text-white transition-colors">
+        <button 
+          type="button" 
+          onClick={onForgotPassword}
+          className="text-[13px] text-blue-600 dark:text-[#58a6ff] hover:text-blue-700 dark:hover:text-white transition-colors"
+        >
           Forgot password?
         </button>
       </div>
