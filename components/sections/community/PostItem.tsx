@@ -100,7 +100,10 @@ export const PostItem = ({ post }: PostItemProps) => {
         {/* Linked Resource Display */}
         {post.linked_resource && (
           <div className="space-y-2 mb-5">
-            <Link href={`/resources/${post.linked_resource.id}-${post.linked_resource.title}`} className="flex items-center justify-between p-3.5 bg-zinc-50/50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/60 rounded-lg group transition-colors hover:border-emerald-500/30">
+            <Link 
+              href={`/resources/${post.linked_resource.id}-${post.linked_resource.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} 
+              className="flex items-center justify-between p-3.5 bg-zinc-50/50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/60 rounded-lg group transition-colors hover:border-emerald-500/30"
+            >
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white dark:bg-zinc-900 rounded-md border border-zinc-200 dark:border-zinc-800 shadow-sm text-emerald-500 transition-colors">
                   <LinkIcon size={14} />

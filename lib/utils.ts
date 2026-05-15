@@ -12,8 +12,15 @@ export const getAvatarUrl = (
   return "/logos/default-avatar.png";
 };
 
-export function unescapeHtml(html: string): string {
+export function unescapeHtml(html: any): string {
   if (!html) return "";
+  
+  // If the input is an object (like EditorJS JSON), we don't want to treat it as HTML
+  if (typeof html !== 'string') {
+    // If it's a JSON object with 'blocks', it's likely from the rich text editor
+    // For now, we return an empty string to avoid crashes, or you could stringify it
+    return "";
+  }
   
   let clean = html.trim();
   

@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 
-export type ContentType = "lesson" | "strategy" | "classroom";
-export type ViewMode = "generator" | "results";
+export type ContentType = "lesson" | "strategy" | "classroom" | "quiz";
+export type ViewMode = "generator" | "results" | "quizzes";
 
 export interface ContentTypeCardProps {
   icon: LucideIcon;

@@ -83,6 +83,14 @@ const CreateResourceContent = () => {
       toast.error("UPLOAD REQUIRED: Please attach a document (PDF, Word, or PowerPoint) first so AI can read it.", TOAST_STYLE);
       return;
     }
+
+    const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+    for (const file of attachedFiles) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`FILE TOO LARGE: "${file.name}" exceeds the 25MB limit.`, TOAST_STYLE);
+        return;
+      }
+    }
     
     try {
       setIsAnalyzing(true);
@@ -91,7 +99,13 @@ const CreateResourceContent = () => {
       if (res.success) {
         const ai = res.data;
         
-        // 1. High-Precision Subject Matcher (AI is now aware of valid options)
+        // Log the per-file analysis for debugging (and potentially show to user later)
+        if (ai.file_labels) {
+          console.log("Per-file AI Analysis:", ai.file_labels);
+          // Future: We could display these labels in the UI to build trust
+        }
+
+        // 1. High-Precision Subject Matcher
         const matchedSubject = metadata?.subjects?.find(
           (s: any) => s.name.toLowerCase() === ai.subject?.toLowerCase()
         ) || metadata?.subjects?.find(
@@ -119,7 +133,8 @@ const CreateResourceContent = () => {
         let durationVal = "";
         let durationUnit = "Minutes";
         if (ai.duration) {
-          const parts = ai.duration.split(" ");
+          const durationStr = String(ai.duration);
+          const parts = durationStr.split(" ");
           if (parts.length >= 1) durationVal = parts[0];
           if (parts.length >= 2) {
              const unit = parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase();
@@ -168,7 +183,8 @@ const CreateResourceContent = () => {
         let val = "";
         let unit = "Minutes";
         if (d.estimate_duration) {
-          const parts = d.estimate_duration.split(" ");
+          const durationStr = String(d.estimate_duration);
+          const parts = durationStr.split(" ");
           if (parts.length >= 2) {
              val = parts[0];
              unit = parts[1];

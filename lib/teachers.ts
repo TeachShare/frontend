@@ -59,5 +59,20 @@ export const TeacherAPI = {
       },
     });
     return response.data;
+  },
+
+  archiveAccount: async () => {
+    const response = await api.post('/teachers/archive');
+    return response.data;
+  },
+
+  restoreAccount: async () => {
+    const response = await api.post('/teachers/restore');
+    return response.data;
+  },
+
+  deleteAccount: async () => {
+    const response = await api.delete('/teachers/delete');
+    return response.data;
   }
 };

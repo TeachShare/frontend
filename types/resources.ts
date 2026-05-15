@@ -30,6 +30,7 @@ export interface ResourceDetail {
   grade: string;
   type: string;
   avg_rating: number;
+  reviews_count: number;
   likes: number;
   remixes: number;
   downloads: number;

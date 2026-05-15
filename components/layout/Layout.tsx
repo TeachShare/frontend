@@ -3,10 +3,21 @@ import React, { useEffect, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { useUser } from "@/hooks/useUser";
+import { RestoreAccountLayout } from "./RestoreAccountLayout";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const { data: user, isLoading } = useUser();
+  const queryClient = useQueryClient();
+
+  const handleRestoreComplete = () => {
+    queryClient.invalidateQueries({ queryKey: ["authUser"] });
+  };
+
+  if (user?.is_archived) {
+    return <RestoreAccountLayout onRestore={handleRestoreComplete} />;
+  }
 
   return (
     <div className="flex h-screen bg-zinc-50 dark:bg-[#090a0c] text-zinc-900 dark:text-zinc-200 font-sans overflow-hidden transition-colors duration-300">

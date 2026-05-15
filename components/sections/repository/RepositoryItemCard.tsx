@@ -59,11 +59,20 @@ export const RepositoryItemCard = ({ data, onRemix, onDownload, onPreview }: Pro
                 {data.weekly_likes > 0 && <span className="text-[10px] text-emerald-500 ml-1">+{data.weekly_likes}</span>}
             </p>
             </div>
-            <div className="space-y-0.5 flex-1 text-right">
-            <div className="flex items-center justify-end gap-1 text-yellow-500/80">
-                <Star size={10} fill="currentColor" />
-                <span className="text-xs font-black">4.9</span>
+            <div className="space-y-0.5">
+                <p className="text-[9px] text-zinc-600 font-black uppercase tracking-tight">Rating</p>
+                <div className="flex items-center gap-1">
+                    {data.avg_rating > 0 ? (
+                        <>
+                            <Star size={10} className="text-yellow-500 fill-yellow-500" />
+                            <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{data.avg_rating}</span>
+                        </>
+                    ) : (
+                        <span className="text-[10px] font-bold text-zinc-400 italic">No ratings</span>
+                    )}
+                </div>
             </div>
+            <div className="space-y-0.5 flex-1 text-right">
             <p className="text-[9px] text-zinc-600 font-black uppercase tracking-tight">
                 Author: {" "}
                 <Link 
@@ -86,7 +95,10 @@ export const RepositoryItemCard = ({ data, onRemix, onDownload, onPreview }: Pro
           <Eye size={16} />
         </button>
         <button 
-          onClick={() => router.push(`/resources/${data.collection_id}`)}
+          onClick={() => {
+            const slug = `${data.collection_id}-${data.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'resource'}`;
+            router.push(`/resources/${slug}`);
+          }}
           className="flex-1 py-2.5 bg-zinc-900 dark:bg-white hover:bg-black dark:hover:bg-emerald-400 text-white dark:text-black text-[11px] font-black uppercase tracking-widest rounded-md transition-all active:scale-95 shadow-sm"
         >
           Explore

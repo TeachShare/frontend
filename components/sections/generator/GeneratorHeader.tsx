@@ -41,6 +41,16 @@ export const GeneratorHeader = ({ activeView, setActiveView, resultsCount = 0 }:
         >
           <Sparkles size={14} /> My Generated ({resultsCount})
         </button>
+        <button
+          onClick={() => setActiveView("quizzes")}
+          className={`px-5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+            activeView === "quizzes"
+              ? "bg-emerald-500 text-white dark:text-zinc-950 shadow-lg shadow-emerald-500/10"
+              : "text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"
+          }`}
+        >
+          My Quizzes
+        </button>
       </div>
     </div>
   );

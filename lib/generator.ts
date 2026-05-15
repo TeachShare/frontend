@@ -6,6 +6,16 @@ export const GeneratorAPI = {
     return response.data;
   },
 
+  generateQuiz: async (data: { topic: string, grade: string, num_questions: number, question_types: string[] }) => {
+    const response = await api.post('/quizzes/generate', data);
+    return response.data;
+  },
+
+  saveQuiz: async (data: any) => {
+    const response = await api.post('/quizzes/save', data);
+    return response.data;
+  },
+
   getHistory: async () => {
     const response = await api.get('/ai/history');
     return response.data;

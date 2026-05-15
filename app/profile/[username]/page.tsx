@@ -31,6 +31,12 @@ import { ReportModal } from "@/components/sections/resources/detail/ReportModal"
   const router = useRouter();
   const dateStr = activity.created_at ? formatDistanceToNow(parseISO(activity.created_at), { addSuffix: true }) : "recently";
 
+  const handleNavigate = () => {
+    if (!activity.collection_id) return;
+    const cleanTitle = activity.collection_title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'resource';
+    router.push(`/resources/${activity.collection_id}-${cleanTitle}`);
+  };
+
   return (
     <div className="flex gap-4 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121212] transition-all">
       <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500 shrink-0">
@@ -45,7 +51,7 @@ import { ReportModal } from "@/components/sections/resources/detail/ReportModal"
         </div>
         {activity.collection_id && (
           <button 
-            onClick={() => router.push(`/resources/${activity.collection_id}`)}
+            onClick={handleNavigate}
             className="mt-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
           >
             View Resource →
@@ -70,7 +76,12 @@ const TabButton = ({ active, onClick, label, count }: any) => (
 );
 
 
-const ResourceCard = ({ resource }: any) => (
+const ResourceCard = ({ resource }: any) => {
+  const router = useRouter();
+  const cleanTitle = resource.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'resource';
+  const slug = `${resource.collection_id}-${cleanTitle}`;
+
+  return (
   <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121212] p-5 flex flex-col group hover:scale-[1.01] transition-all duration-300">
     <div className="flex justify-between items-start mb-4">
       <div className="flex items-center gap-2">
@@ -84,7 +95,12 @@ const ResourceCard = ({ resource }: any) => (
       <button className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"><MoreVertical size={18} /></button>
     </div>
 
-    <h3 className="text-xl font-bold mb-1 text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors cursor-pointer">{resource.title}</h3>
+    <h3 
+      onClick={() => router.push(`/resources/${slug}`)}
+      className="text-xl font-bold mb-1 text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors cursor-pointer"
+    >
+      {resource.title}
+    </h3>
     <p className="text-sm text-zinc-500 mb-4">{resource.category} • {resource.grade}</p>
 
     <div className="flex flex-wrap gap-2 mb-6">
@@ -102,7 +118,10 @@ const ResourceCard = ({ resource }: any) => (
     </div>
 
     <div className="mt-5 grid grid-cols-2 gap-3">
-       <button className="py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2">
+       <button 
+         onClick={() => router.push(`/resources/${slug}`)}
+         className="py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2"
+       >
          View Resource
        </button>
        <button 

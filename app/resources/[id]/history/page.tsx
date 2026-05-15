@@ -12,6 +12,8 @@ import { HistoryHeader } from "@/components/sections/resources/detail/history/Hi
 import { ResourceInfoCard } from "@/components/sections/resources/detail/history/ResourceInfoCard";
 import { VersionCard } from "@/components/sections/resources/detail/history/VersionCard";
 import { HistoryFooter } from "@/components/sections/resources/detail/history/HistoryFooter";
+import { RestoreModal } from "@/components/sections/resources/detail/history/RestoreModal";
+import { toast } from "react-hot-toast";
 
 const VersionHistoryPage = () => {
   const { id } = useParams(); // e.g., "38-photosynthesis-lesson"
@@ -21,6 +23,7 @@ const VersionHistoryPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [restoreTarget, setRestoreTarget] = useState<any | null>(null);
 
   const { data: user } = useUser();
   const isOwner = user && versions.length > 0 && versions[0].owner_id === user.id;
@@ -52,19 +55,20 @@ const VersionHistoryPage = () => {
     fetchHistory(true);
   }, [collectionId]);
 
-  const handleRestore = async (versionId: number) => {
-    if (!window.confirm("Are you sure you want to restore this version?")) return;
+  const handleRestore = async () => {
+    if (!restoreTarget) return;
 
     try {
       setIsRestoring(true);
-      const response = await api.post(`/resource_collection/${collectionId}/restore/${versionId}`);
+      const response = await api.post(`/resource_collection/${collectionId}/restore/${restoreTarget.version_id}`);
       
       if (response.data.success) {
         await fetchHistory(false); 
-        alert("Restored successfully!");
+        toast.success("Version restored successfully!");
+        setRestoreTarget(null);
       }
     } catch (err: any) {
-      alert(err.response?.data?.error || "Error restoring version");
+      toast.error(err.response?.data?.error || "Error restoring version");
     } finally {
       setIsRestoring(false);
     }
@@ -101,6 +105,13 @@ const VersionHistoryPage = () => {
   return (
     <Layout>
       <main className="flex-1 bg-zinc-50 dark:bg-[#090a0c] overflow-y-auto transition-colors duration-300">
+        <RestoreModal 
+          isOpen={!!restoreTarget}
+          onClose={() => setRestoreTarget(null)}
+          version={restoreTarget}
+          onConfirm={handleRestore}
+          isLoading={isRestoring}
+        />
         <div className="max-w-6xl mx-auto p-8 space-y-8 animate-in fade-in duration-500">
           <HistoryHeader />
 
@@ -137,7 +148,7 @@ const VersionHistoryPage = () => {
                     isLast={i === versions.length - 1}
                     isLatest={version.is_latest}
                     isOwner={isOwner}
-                    onRestore={() => handleRestore(version.version_id)}
+                    onRestore={() => setRestoreTarget(version)}
                     disabled={isRestoring}
                   />
                 ))

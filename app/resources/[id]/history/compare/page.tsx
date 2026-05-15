@@ -58,10 +58,24 @@ const CompareVersionsPage = () => {
       const versions = historyRes.data.data;
       setAllVersions(versions);
 
-      // 2. Fetch the comparison between the selected version number and the current (latest)
-      // If no "with" is provided, default to the second newest version
-      const v1_no = compareWithVersion || versions[1]?.version_no;
-      const v2_no = versions[0]?.version_no; // Latest
+      // 2. Identify the 'Current Active' version (is_latest = true)
+      // This is the version currently serving as the production/live state
+      const activeVersion = versions.find((v: any) => v.is_latest);
+      const v2_no = activeVersion?.version_no; 
+
+      // 3. Determine the 'Target Version' (v1)
+      // If "with" is provided, use it. Otherwise, default to the most recent version.
+      // If the most recent is the active version itself, fallback to the previous archive.
+      const mostRecentVersion = versions[0];
+      let v1_no = compareWithVersion ? Number(compareWithVersion) : null;
+
+      if (!v1_no) {
+        if (mostRecentVersion?.version_no === v2_no) {
+          v1_no = versions[1]?.version_no; // Compare Active v5 against Archive v4
+        } else {
+          v1_no = mostRecentVersion?.version_no; // Compare Proposal v6 against Active v5
+        }
+      }
       
       if (v1_no && v2_no) {
         // If trying to compare the same version, handle gracefully
@@ -125,13 +139,16 @@ const CompareVersionsPage = () => {
   };
 
   const selectForComparison = (v_no: number) => {
-    // If selecting the current latest version, we can either do nothing or toast
-    const latestNo = allVersions[0]?.version_no;
-    if (v_no === latestNo) {
+    // If selecting the current active version, we can either do nothing or toast
+    const activeNo = allVersions[0]?.version_no;
+    if (v_no === activeNo) {
        return;
     }
     router.push(`?with=${v_no}`);
   };
+
+  // 4. Identify which version is currently being used as v1 for highlighting in sidebar
+  const currentV1No = compareData?.v1?.version_no;
 
   return (
     <Layout>
@@ -149,7 +166,7 @@ const CompareVersionsPage = () => {
             <h2 className="text-sm font-bold flex items-center gap-2">
               <History size={16} className="text-blue-600" /> Version History
             </h2>
-            <p className="text-[10px] text-zinc-500 mt-1">Select a version to compare with current</p>
+            <p className="text-[10px] text-zinc-500 mt-1">Select a version to compare with current active version</p>
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -158,7 +175,7 @@ const CompareVersionsPage = () => {
                 key={`${v.version_id}-${idx}`}
                 onClick={() => selectForComparison(v.version_no)}
                 className={`w-full text-left p-4 rounded-xl border transition-all ${
-                  compareWithVersion === String(v.version_no) || (v.is_latest && !compareWithVersion)
+                  v.version_no === currentV1No
                     ? "bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/30"
                     : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900"
                 }`}
@@ -244,7 +261,7 @@ const CompareVersionsPage = () => {
               <div className="grid grid-cols-2 gap-8">
                 {/* Column 1: The Selected Archive Snapshot (v1, v2, v3...) */}
                 <CompareColumn 
-                  label={`Archive Snapshot v${compareData.v1.version_no}`} 
+                  label={`Target Version v${compareData.v1.version_no}`} 
                   data={compareData.v1} 
                   otherData={compareData.v2}
                   isLatest={false} 
@@ -253,7 +270,7 @@ const CompareVersionsPage = () => {
 
                 {/* Column 2: The Current Active Reference (v5) */}
                 <CompareColumn 
-                  label={`Current Active v${compareData.v2.version_no}`} 
+                  label={`Current Active Version v${compareData.v2.version_no}`} 
                   data={compareData.v2} 
                   otherData={compareData.v1}
                   isLatest={true} 
@@ -276,8 +293,8 @@ const CompareVersionsPage = () => {
                 </div>
                 <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700" />
                 <div className="flex gap-4">
-                   <span className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Archive v{compareData.v1.version_no}</span>
-                   <span className="text-[10px] font-black uppercase text-emerald-500 tracking-widest">Active v{compareData.v2.version_no}</span>
+                   <span className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Target v{compareData.v1.version_no}</span>
+                   <span className="text-[10px] font-black uppercase text-emerald-500 tracking-widest">Current Active v{compareData.v2.version_no}</span>
                 </div>
               </div>
               <button 
@@ -310,7 +327,7 @@ const CompareVersionsPage = () => {
                   />
                </div>
 
-               {/* Right Viewer (Latest) */}
+               {/* Right Viewer (Current Active) */}
                <div className="flex-1 relative h-full">
                   <div className="absolute top-2 left-4 z-20 pointer-events-none">
                      <span className="bg-emerald-500 text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest shadow-xl">Modified</span>
@@ -573,7 +590,7 @@ const CompareColumn = ({ label, data, otherData, isLatest, setSideBySideFiles }:
               <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-tighter ${
                 isLatest ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
               }`}>
-                {isLatest ? 'Changes Detected' : 'Original Version'}
+                {isLatest ? 'Current Active Version' : 'Target Version'}
               </span>
             )}
           </div>

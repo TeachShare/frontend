@@ -60,13 +60,19 @@ export const DetailHero = ({ resource }: Props) => {
             <RefreshCw size={12} /> {resource.title}
           </div>
           <div className="flex items-center justify-end gap-1 text-yellow-500">
-            <Star size={14} fill="currentColor" />{" "}
-            <span className="text-zinc-900 dark:text-white font-bold transition-colors duration-300">
-              {resource.rating}
-            </span>
-            <span className="text-zinc-500 dark:text-zinc-500 text-xs ml-1 transition-colors duration-300">
-              · {resource.reviews} reviews
-            </span>
+            {resource.avg_rating > 0 ? (
+                <>
+                    <Star size={14} fill="currentColor" />{" "}
+                    <span className="text-zinc-900 dark:text-white font-bold transition-colors duration-300">
+                    {resource.avg_rating}
+                    </span>
+                    <span className="text-zinc-500 dark:text-zinc-500 text-xs ml-1 transition-colors duration-300">
+                    · {resource.reviews_count || 0} reviews
+                    </span>
+                </>
+            ) : (
+                <span className="text-[10px] font-bold text-zinc-400 italic">No ratings yet</span>
+            )}
           </div>
           <div className="flex gap-4 text-[10px] text-zinc-500 dark:text-zinc-500 font-bold uppercase tracking-widest transition-colors duration-300">
             <span>Likes {resource.likes}</span>

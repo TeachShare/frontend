@@ -14,6 +14,7 @@ interface ExtendedResourceCardProps extends ResourceCardProps {
   tags?: string[];
   updated_at?: string;
   like_count?: number;
+  avg_rating?: number;
   download_count?: number; 
   is_collaborator?: boolean;
   is_remix?: boolean;
@@ -29,6 +30,7 @@ export const ResourceCard = ({
   downloads = 0, 
   likes = 0,
   weekly_likes = 0,
+  avg_rating = 0,
   updated_at, 
   is_published,
   status,
@@ -167,6 +169,19 @@ export const ResourceCard = ({
 
             <div className="flex items-center gap-8 px-6">
                 <div className="text-center">
+                    <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter">Rating</p>
+                    <div className="flex items-center justify-center gap-1">
+                        {avg_rating > 0 ? (
+                            <>
+                                <Star size={10} className="text-yellow-500 fill-yellow-500" />
+                                <p className="text-xs font-black text-zinc-900 dark:text-zinc-300">{avg_rating}</p>
+                            </>
+                        ) : (
+                            <p className="text-[9px] font-bold text-zinc-400 italic">No ratings</p>
+                        )}
+                    </div>
+                </div>
+                <div className="text-center">
                     <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter">Likes</p>
                     <p className="text-xs font-black text-zinc-900 dark:text-zinc-300">
                         {likes}
@@ -234,7 +249,20 @@ export const ResourceCard = ({
             {tags.length > 3 && <span className="text-[9px] text-zinc-400">+{tags.length - 3} more</span>}
           </div>
 
-          <div className="grid grid-cols-3 gap-y-2 mb-4 border-t border-zinc-100 dark:border-zinc-800/50 pt-3">
+          <div className="grid grid-cols-4 gap-y-2 mb-4 border-t border-zinc-100 dark:border-zinc-800/50 pt-3">
+            <div className="text-center border-r border-zinc-50 dark:border-zinc-800/50">
+               <p className="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Rating</p>
+               <div className="flex items-center justify-center gap-1">
+                 {avg_rating > 0 ? (
+                    <>
+                        <Star size={8} className="text-yellow-500 fill-yellow-500" />
+                        <p className="text-xs font-black text-zinc-900 dark:text-zinc-200">{avg_rating}</p>
+                    </>
+                 ) : (
+                    <p className="text-[9px] font-bold text-zinc-400 italic">None</p>
+                 )}
+               </div>
+            </div>
             <div className="text-center border-r border-zinc-50 dark:border-zinc-800/50">
                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Likes</p>
                <p className="text-xs font-black text-zinc-900 dark:text-zinc-200">

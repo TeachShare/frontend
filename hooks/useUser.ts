@@ -20,6 +20,7 @@ export interface User {
   auth_provider?: string;
   is_verified: boolean;
   is_admin: boolean;
+  is_archived: boolean;
 }
 
 // 2. The fetcher function

@@ -32,6 +32,7 @@ const RepositoryPage = () => {
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [totalAvgRating, setTotalAvgRating] = useState(0);
 
   const [filters, setFilters] = useState({
     query: "",
@@ -70,6 +71,7 @@ const RepositoryPage = () => {
         }
         setHasNext(response.data.has_next);
         setTotalCount(response.data.total_count || 0);
+        setTotalAvgRating(response.data.total_avg_rating || 0);
       }
     } catch (err) {
       console.error("Discovery fetch error:", err);
@@ -165,7 +167,9 @@ const RepositoryPage = () => {
             
             <div className="flex items-center gap-6">
               <div className="text-right">
-                <p className="text-lg font-black text-zinc-900 dark:text-white leading-none">4.7</p>
+                <p className="text-lg font-black text-zinc-900 dark:text-white leading-none">
+                  {totalAvgRating > 0 ? totalAvgRating : "No ratings"}
+                </p>
                 <p className="text-[9px] font-bold text-zinc-500 dark:text-zinc-600 uppercase tracking-tighter">Avg Rating</p>
               </div>
               <div className="text-right">

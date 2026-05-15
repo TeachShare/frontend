@@ -25,7 +25,10 @@ export const useNotifications = () => {
     
     const socket = io(socketUrl, {
       withCredentials: true,
-      transports: ['websocket', 'polling'], // Allow fallback but prefer websocket
+      path: "/socket.io/",
+      transports: ['polling', 'websocket'], // Use polling first for better compatibility, then upgrade
+      reconnectionAttempts: 5,
+      timeout: 20000,
     });
 
     socket.on("connect", () => {

@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Lightbulb,
   FileText,
+  ListTodo,
 } from "lucide-react";
 import { ContentType, ViewMode } from "@/types/generator";
 import { ContentTypeCard } from "./ContentTypeCard";
@@ -27,6 +28,18 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
   const [grade, setGrade] = useState<string>("");
   const [objectives, setObjectives] = useState<string>("");
 
+  // Quiz specific state
+  const [numQuestions, setNumQuestions] = useState<number>(5);
+  const [quizTypes, setQuizTypes] = useState<string[]>(["multiple_choice"]);
+
+  const toggleQuizType = (type: string) => {
+    setQuizTypes(prev => 
+      prev.includes(type) 
+        ? prev.filter(t => t !== type) 
+        : [...prev, type]
+    );
+  };
+
   // Sync with metadata when it loads
   React.useEffect(() => {
     if (metadata) {
@@ -42,13 +55,22 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
       );
       return;
     }
+    
+    if (selectedType === "quiz" && quizTypes.length === 0) {
+      setValidationError("Please select at least one question type for the quiz.");
+      return;
+    }
+
     setValidationError(null);
     
     await generate({
       type: selectedType,
       subject,
       grade,
-      objectives
+      objectives,
+      // Quiz extras
+      num_questions: numQuestions,
+      question_types: quizTypes
     });
 
     onSuccess();
@@ -81,16 +103,25 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
           active={selectedType === "classroom"}
           onClick={() => setSelectedType("classroom")}
         />
+        <ContentTypeCard
+          icon={ListTodo}
+          title="Interactive Quiz"
+          description="Instant online quizzes with student links, timers, and live results."
+          active={selectedType === "quiz"}
+          onClick={() => setSelectedType("quiz")}
+        />
       </div>
 
       {/* Input Form */}
       <div className="bg-white dark:bg-[#121417] border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-8 space-y-8 relative overflow-hidden transition-colors duration-300">
         <div className="relative z-10">
           <h2 className="text-lg font-bold text-zinc-900 dark:text-white transition-colors duration-300">
-            Content Details
+            {selectedType === "quiz" ? "Quiz Configuration" : "Content Details"}
           </h2>
           <p className="text-zinc-500 dark:text-zinc-500 text-xs mt-1 transition-colors duration-300">
-            Provide information to customize your generated content.
+            {selectedType === "quiz" 
+              ? "Define the scope and mechanics of your interactive assessment."
+              : "Provide information to customize your generated content."}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
@@ -148,13 +179,57 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
             </div>
           </div>
 
+          {selectedType === "quiz" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 animate-in slide-in-from-top-2 duration-300">
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center transition-colors duration-300">
+                  Number of Questions
+                </label>
+                <input 
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={numQuestions}
+                  onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-emerald-500/30 text-zinc-900 dark:text-zinc-300 transition-colors duration-300"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center transition-colors duration-300">
+                  Question Types
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'multiple_choice', label: 'MC' },
+                    { id: 'true_false', label: 'T/F' },
+                    { id: 'short_answer', label: 'SA' }
+                  ].map(type => (
+                    <button
+                      key={type.id}
+                      onClick={() => toggleQuizType(type.id)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                        quizTypes.includes(type.id)
+                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 hover:text-zinc-900 dark:hover:text-zinc-300'
+                      }`}
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-8 space-y-2">
             <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center transition-colors duration-300">
-              Learning Goals/Objectives{" "}
+              {selectedType === "quiz" ? "Quiz Topic & Scope" : "Learning Goals/Objectives"}{" "}
               <span className="text-red-500 ml-1 font-black">*</span>
             </label>
             <textarea
-              placeholder="Introduce students to software engineering basics..."
+              placeholder={selectedType === "quiz" 
+                ? "Describe the topic or paste the source text for the quiz..." 
+                : "Introduce students to software engineering basics..."}
               value={objectives}
               onChange={(e) => setObjectives(e.target.value)}
               rows={5}
@@ -177,13 +252,15 @@ export const GeneratorForm = ({ onSuccess }: Props) => {
               ) : (
                 <Sparkles size={18} />
               )}
-              Generate Content with AI
+              {selectedType === "quiz" ? "Generate Interactive Quiz" : "Generate Content with AI"}
             </button>
 
             {isGenerating && (
               <div className="space-y-3 animate-in fade-in">
                 <p className="text-center text-zinc-500 dark:text-zinc-500 text-[11px] font-medium italic transition-colors duration-300">
-                  Generating classroom materials based on your objectives... This may take a few seconds.
+                  {selectedType === "quiz" 
+                    ? "Designing questions and structuring your assessment... This may take a moment."
+                    : "Generating classroom materials based on your objectives... This may take a few seconds."}
                 </p>
               </div>
             )}

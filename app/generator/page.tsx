@@ -6,11 +6,13 @@ import { ViewMode } from '@/types/generator';
 import { GeneratorHeader } from '@/components/sections/generator/GeneratorHeader';
 import { GeneratorForm } from '@/components/sections/generator/GeneratorForm';
 import { ResultsView } from '@/components/sections/generator/ResultsView';
+import { QuizPreview } from '@/components/sections/generator/QuizPreview';
+import { QuizHistory } from '@/components/sections/generator/QuizHistory';
 import { GeneratorProvider, useGenerator } from '@/hooks/useGenerator';
 
 const PageContent = () => {
   const [activeView, setActiveView] = useState<ViewMode>('generator');
-  const { results } = useGenerator();
+  const { results, pendingQuiz } = useGenerator();
 
   return (
     <main className="flex-1 flex flex-col min-w-0 bg-zinc-50 dark:bg-[#090a0c] transition-colors duration-300">
@@ -22,8 +24,12 @@ const PageContent = () => {
           resultsCount={results.length}
         />
 
-        {activeView === 'generator' ? (
+        {pendingQuiz ? (
+          <QuizPreview />
+        ) : activeView === 'generator' ? (
           <GeneratorForm onSuccess={() => setActiveView('results')} />
+        ) : activeView === 'quizzes' ? (
+          <QuizHistory />
         ) : (
           <ResultsView onGenerateMore={() => setActiveView('generator')} />
         )}
