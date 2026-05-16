@@ -61,6 +61,17 @@ export const TeacherAPI = {
     return response.data;
   },
 
+  uploadCoverPhoto: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/teachers/update/cover', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   archiveAccount: async () => {
     const response = await api.post('/teachers/archive');
     return response.data;

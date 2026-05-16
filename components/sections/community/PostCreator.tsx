@@ -124,7 +124,7 @@ export const PostCreator = ({ onPublish, isPublishing = false }: PostCreatorProp
                 {att.type === "library" ? (
                   <LinkIcon size={12} className="text-emerald-500" />
                 ) : (
-                  <Paperclip size={12} className="text-zinc-400" />
+                  <Paperclip size={12} className="text-zinc-400 hidden" />
                 )}
                 <span className="text-[10px] font-bold text-zinc-700 dark:text-emerald-400 uppercase tracking-tight">
                   {att.name}
@@ -154,12 +154,12 @@ export const PostCreator = ({ onPublish, isPublishing = false }: PostCreatorProp
             multiple
             onChange={handleFileChange}
           />
-          <button
+          {/* <button
             onClick={() => fileInputRef.current?.click()}
             className="p-2 text-zinc-400 hover:text-emerald-500 transition-colors bg-white dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm"
           >
             <Paperclip size={16} />
-          </button>
+          </button> */}
 
           <div className="relative" ref={dropdownRef}>
             <button

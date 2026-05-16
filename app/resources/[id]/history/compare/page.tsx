@@ -283,68 +283,76 @@ const CompareVersionsPage = () => {
 
         {/* --- Side-by-Side Visual Comparison Modal --- */}
         {sideBySideFiles && (
-          <div className="fixed inset-0 z-[110] flex flex-col bg-zinc-50 dark:bg-zinc-950 animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-[110] flex flex-col bg-[#08090A] animate-in fade-in duration-300">
             {/* Header */}
-            <div className="flex-none h-14 flex justify-between items-center px-6 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="flex-none h-14 flex justify-between items-center px-6 bg-[#08090A] border-b border-[#1F2226]">
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-zinc-900 dark:text-white">
-                   <Columns2 size={18} className="text-blue-500" />
-                   <h3 className="font-bold text-sm tracking-tight">Side-by-Side Comparison: <span className="text-zinc-500 dark:text-zinc-400 italic font-medium">{sideBySideFiles.v1.name}</span></h3>
+                <div className="flex items-center gap-2 text-white">
+                   <Columns2 size={18} className="text-[#00D084]" />
+                   <h3 className="font-bold text-sm tracking-tight">Side-by-Side Comparison: <span className="text-zinc-400 italic font-medium">{sideBySideFiles.v1.name}</span></h3>
                 </div>
-                <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700" />
+                <div className="h-4 w-[1px] bg-zinc-700" />
                 <div className="flex gap-4">
                    <span className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Target v{compareData.v1.version_no}</span>
-                   <span className="text-[10px] font-black uppercase text-emerald-500 tracking-widest">Current Active v{compareData.v2.version_no}</span>
+                   <span className="text-[10px] font-black uppercase text-[#00D084] tracking-widest">Current Active v{compareData.v2.version_no}</span>
                 </div>
               </div>
               <button 
                 onClick={() => setSideBySideFiles(null)}
-                className="p-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* Viewers */}
-            <div className="flex-1 flex divide-x divide-zinc-200 dark:divide-zinc-800 overflow-hidden bg-zinc-100 dark:bg-[#181a1d]">
+            <div className="flex-1 flex divide-x divide-[#1F2226] overflow-hidden bg-[#08090A]">
                {/* Left Viewer (Archive) */}
                <div className="flex-1 relative h-full">
                   <div className="absolute top-2 left-4 z-20 pointer-events-none">
                      <span className="bg-rose-500 text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest shadow-xl">Original</span>
                   </div>
-                  <DocViewer 
-                    key={`left-${resolvedTheme}`}
-                    documents={[{ uri: sideBySideFiles.v1.url, fileName: sideBySideFiles.v1.name }]} 
-                    pluginRenderers={DocViewerRenderers}
-                    style={{ width: "100%", height: "100%" }}
-                    config={{ header: { disableHeader: true } }}
-                    theme={{ 
-                      primary: "#f43f5e", 
-                      secondary: resolvedTheme === 'dark' ? "#090a0c" : "#f4f4f5", 
-                      tertiary: resolvedTheme === 'dark' ? "#18181b" : "#ffffff", 
-                      textPrimary: resolvedTheme === 'dark' ? "#ffffff" : "#18181b" 
-                    }}
-                  />
+               <div className="flex-1 p-4 md:p-8">
+                <div className="h-full w-full max-w-6xl mx-auto rounded-xl overflow-hidden border border-[#1F2226] shadow-2xl relative">
+                  <div className="absolute inset-0 [&_*]:h-full [&_iframe]:!h-full [&_iframe]:!border-none">
+                    <DocViewer
+                      documents={[{ uri: sideBySideFiles.v1.url, fileName: sideBySideFiles.v1.name }]}         pluginRenderers={DocViewerRenderers}
+                      config={{ header: { disableHeader: true } }}
+                      theme={{
+                        primary: "#00D084",
+                        secondary: "#08090A",
+                        tertiary: "#111317",
+                        textPrimary: "#ffffff",
+                        textSecondary: "#8E9196",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
                </div>
 
                {/* Right Viewer (Current Active) */}
                <div className="flex-1 relative h-full">
                   <div className="absolute top-2 left-4 z-20 pointer-events-none">
-                     <span className="bg-emerald-500 text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest shadow-xl">Modified</span>
+                     <span className="bg-[#00D084] text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest shadow-xl">Modified</span>
                   </div>
-                  <DocViewer 
-                    key={`right-${resolvedTheme}`}
-                    documents={[{ uri: sideBySideFiles.v2.url, fileName: sideBySideFiles.v2.name }]} 
-                    pluginRenderers={DocViewerRenderers}
-                    style={{ width: "100%", height: "100%" }}
-                    config={{ header: { disableHeader: true } }}
-                    theme={{ 
-                      primary: "#10b981", 
-                      secondary: resolvedTheme === 'dark' ? "#090a0c" : "#f4f4f5", 
-                      tertiary: resolvedTheme === 'dark' ? "#18181b" : "#ffffff", 
-                      textPrimary: resolvedTheme === 'dark' ? "#ffffff" : "#18181b" 
-                    }}
-                  />
+                  <div className="h-full w-full relative">
+                    <div className="absolute inset-0 [&_*]:h-full [&_iframe]:!h-full [&_iframe]:!border-none">
+                      <DocViewer 
+                        key={`right-${resolvedTheme}`}
+                        documents={[{ uri: sideBySideFiles.v2.url, fileName: sideBySideFiles.v2.name }]} 
+                        pluginRenderers={DocViewerRenderers}
+                        config={{ header: { disableHeader: true } }}
+                        theme={{ 
+                          primary: "#00D084", 
+                          secondary: "#08090A", 
+                          tertiary: "#111317", 
+                          textPrimary: "#ffffff",
+                          textSecondary: "#8E9196",
+                        }}
+                      />
+                    </div>
+                  </div>
                </div>
             </div>
           </div>
@@ -603,48 +611,41 @@ const CompareColumn = ({ label, data, otherData, isLatest, setSideBySideFiles }:
 
       {/* --- UPDATED: React Doc Viewer Modal --- */}
       {viewFile && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm animate-in fade-in duration-300">
-          
+        <div className="fixed inset-0 z-[100] flex flex-col bg-zinc-900/90 backdrop-blur-sm animate-in fade-in duration-300">
           {/* Header */}
-          <div className="flex-none h-14 flex justify-between items-center px-6 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 shadow-xl z-10">
-            <h3 className="text-zinc-900 dark:text-white font-bold text-sm truncate max-w-xl italic opacity-80">
+          <div className="flex-none h-14 flex justify-between items-center px-6 bg-[#08090A] border-b border-[#1F2226] shadow-xl z-10">
+            <h3 className="text-white font-bold text-sm truncate max-w-xl italic opacity-80 flex items-center gap-2">
+              <FileText size={16} className="text-[#00D084]" />
               {viewFile.name}
             </h3>
             <button 
               onClick={() => setViewFile(null)}
-              className="p-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+              className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
             >
               <X size={20} />
             </button>
           </div>
-          
-          {/* Main Viewer Container */}
-          <div className="flex-1 relative w-full max-w-7xl mx-auto my-2 md:my-4 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xl bg-zinc-50 dark:bg-zinc-900">
-            <div className="absolute inset-0 [&_*]:!h-full [&_iframe]:!h-full [&_iframe]:!border-none">
-              <DocViewer 
-                key={`single-${resolvedTheme}`}
-                documents={[{ uri: viewFile.url, fileName: viewFile.name }]} 
-                pluginRenderers={DocViewerRenderers}
-                style={{ width: "100%", height: "100%" }}
-                config={{
-                  header: {
-                    disableHeader: true,
-                  },
-                }}
-                theme={{
-                  primary: "#2563eb", 
-                  secondary: resolvedTheme === 'dark' ? "#090a0c" : "#f4f4f5", 
-                  tertiary: resolvedTheme === 'dark' ? "#18181b" : "#ffffff", 
-                  textPrimary: resolvedTheme === 'dark' ? "#ffffff" : "#18181b", 
-                  textSecondary: resolvedTheme === 'dark' ? "#a1a1aa" : "#71717a", 
-                  disableThemeScrollbar: false,
-                }}
-              />
+
+          <div className="flex-1 p-4 md:p-8">
+            <div className="h-full w-full max-w-6xl mx-auto rounded-xl overflow-hidden border border-[#1F2226] shadow-2xl relative">
+              <div className="absolute inset-0 [&_*]:!h-full [&_iframe]:!h-full [&_iframe]:!border-none">
+                <DocViewer
+                  documents={[{ uri: viewFile.url, fileName: viewFile.name }]}
+                  pluginRenderers={DocViewerRenderers}
+                  config={{ header: { disableHeader: true } }}
+                  theme={{
+                    primary: "#00D084",
+                    secondary: "#08090A",
+                    tertiary: "#111317",
+                    textPrimary: "#ffffff",
+                    textSecondary: "#8E9196",
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
-      )}
-    </>
+      )}    </>
   );
 };
 export default CompareVersionsPage;

@@ -22,6 +22,10 @@ import { SkeletonProfileHeader, SkeletonProfileResourceCard } from "@/components
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { getAvatarUrl } from "@/lib/utils";
 import { ReportModal } from "@/components/sections/resources/detail/ReportModal";
+import { useRef } from "react";
+import { TeacherAPI } from "@/lib/teachers";
+import { toast } from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
   const UsersIcon = ({ size }: { size: number }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -76,7 +80,7 @@ const TabButton = ({ active, onClick, label, count }: any) => (
 );
 
 
-const ResourceCard = ({ resource }: any) => {
+const ResourceCard = (resource: any) => {
   const router = useRouter();
   const cleanTitle = resource.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'resource';
   const slug = `${resource.collection_id}-${cleanTitle}`;
@@ -137,14 +141,18 @@ const ResourceCard = ({ resource }: any) => {
     </div>
   </div>
 );
+};
 
 const ProfileContent = () => {
     const params = useParams();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const username = params.username as string;
     
     const [activeTab, setActiveTab] = useState('resources');
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isUpdatingCover, setIsUpdatingCover] = useState(false);
+    const coverInputRef = useRef<HTMLInputElement>(null);
 
     const { data: profileResponse, isLoading: profileLoading } = useTeacherProfile(username);
     const teacherData = profileResponse?.data;
@@ -158,6 +166,36 @@ const ProfileContent = () => {
     const isOwnProfile = currentUser?.id === teacherId;
     const resources = resourcesResponse?.data.resources || [];
     const activities = activityResponse?.activities || [];
+
+    const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validation
+        if (!file.type.startsWith('image/')) {
+            toast.error("Please upload an image file");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image size must be less than 5MB");
+            return;
+        }
+
+        try {
+            setIsUpdatingCover(true);
+            const res = await TeacherAPI.uploadCoverPhoto(file);
+            if (res.success) {
+                toast.success("Cover photo updated!");
+                queryClient.invalidateQueries({ queryKey: ["teacherProfile", username] });
+            }
+        } catch (err) {
+            toast.error("Failed to update cover photo");
+            console.error(err);
+        } finally {
+            setIsUpdatingCover(false);
+        }
+    };
 
     if (profileLoading) {
         return (
@@ -195,11 +233,46 @@ const ProfileContent = () => {
             <div className="max-w-6xl mx-auto">
                 {/* PROFILE HEADER CARD */}
                 <div className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121212] mb-8 transition-colors duration-300">
-                    <div className="h-40 bg-gradient-to-r from-emerald-900/40 via-blue-900/40 to-purple-900/40 relative">
+                    <div className="h-48 relative group">
+                        {teacherData.cover_image_url ? (
+                            <img 
+                                src={teacherData.cover_image_url} 
+                                className="w-full h-full object-cover" 
+                                alt="Cover" 
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-r from-emerald-900/40 via-blue-900/40 to-purple-900/40" />
+                        )}
+                        
                         {isOwnProfile && (
-                            <button className="absolute bottom-4 right-4 bg-white/20 dark:bg-black/40 backdrop-blur-md p-2 rounded-lg text-sm border border-white/20 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-black/60 transition-all flex items-center gap-2">
-                                <Edit2 size={14} /> Edit Cover
-                            </button>
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button 
+                                    onClick={() => coverInputRef.current?.click()}
+                                    disabled={isUpdatingCover}
+                                    className="bg-white/20 dark:bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/20 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-black/60 transition-all flex items-center gap-2 shadow-2xl"
+                                >
+                                    {isUpdatingCover ? <Loader2 size={16} className="animate-spin" /> : <Edit2 size={16} />}
+                                    {teacherData.cover_image_url ? "Change Cover" : "Add Cover Photo"}
+                                </button>
+                                <input 
+                                    type="file" 
+                                    ref={coverInputRef} 
+                                    onChange={handleCoverUpload} 
+                                    className="hidden" 
+                                    accept="image/*"
+                                />
+                            </div>
+                        )}
+
+                        {isOwnProfile && !teacherData.cover_image_url && (
+                             <button 
+                                onClick={() => coverInputRef.current?.click()}
+                                disabled={isUpdatingCover}
+                                className="absolute bottom-4 right-4 bg-white/20 dark:bg-black/40 backdrop-blur-md p-2 rounded-lg text-sm border border-white/20 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-black/60 transition-all flex items-center gap-2"
+                             >
+                                 {isUpdatingCover ? <Loader2 size={14} className="animate-spin" /> : <Edit2 size={14} />} 
+                                 Edit Cover
+                             </button>
                         )}
                     </div>
                     
@@ -259,7 +332,10 @@ const ProfileContent = () => {
                                     </>
                                 )}
                                 {isOwnProfile && (
-                                    <button className="px-6 py-2 rounded-xl font-bold flex items-center gap-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-transparent text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all">
+                                    <button 
+                                        onClick={() => router.push('/settings')}
+                                        className="px-6 py-2 rounded-xl font-bold flex items-center gap-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-transparent text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
+                                    >
                                         <Edit2 size={18} /> Edit Profile
                                     </button>
                                 )}

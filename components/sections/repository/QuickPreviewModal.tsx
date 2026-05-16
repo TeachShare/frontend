@@ -198,46 +198,51 @@ export const QuickPreviewModal = ({ isOpen, onClose, resource, onRemix, onDownlo
 
         {/* Individual File View Modal */}
         {viewFile && (
-            <div className="fixed inset-0 z-[120] flex flex-col bg-zinc-950/90 dark:bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-[120] flex flex-col bg-zinc-950/90 dark:bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="flex-none h-14 flex justify-between items-center px-8 bg-white dark:bg-[#0c0d0f] border-b border-zinc-200 dark:border-zinc-800 shadow-sm">
                 <div className="flex items-center gap-3">
-                <div className="p-1.5 bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-500/20">
+                  <div className="p-1.5 bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-500/20">
                     <FileText size={16} />
-                </div>
-                <h3 className="text-zinc-900 dark:text-white font-bold text-sm tracking-tight truncate max-w-lg">{viewFile.name}</h3>
+                  </div>
+                  <h3 className="text-zinc-900 dark:text-white font-bold text-sm tracking-tight truncate max-w-lg">{viewFile.name}</h3>
                 </div>
                 <button 
-                onClick={() => setViewFile(null)}
-                className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full transition-all"
+                  onClick={() => setViewFile(null)}
+                  className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full transition-all"
                 >
-                <X size={20} />
+                  <X size={20} />
                 </button>
             </div>
             
-            <div className="flex-1 p-4 md:p-8 flex flex-col min-h-0 relative">
-                <div className="flex-1 h-full w-full max-w-7xl mx-auto rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl relative bg-zinc-100 dark:bg-[#0D0F12] flex flex-col">
-                {mounted && (
-                  <DocViewer 
-                    key={`view-${resolvedTheme}`}
-                    documents={[{ uri: viewFile.url, fileName: viewFile.name }]} 
-                    pluginRenderers={DocViewerRenderers}
-                    config={{ 
-                      header: { disableHeader: true },
-                      pdfVerticalScrollByDefault: true,
-                    }}
-                    theme={{
-                      primary: "#3b82f6",
-                      secondary: resolvedTheme === 'dark' ? "#08090A" : "#f3f4f6",
-                      tertiary: resolvedTheme === 'dark' ? "#111317" : "#ffffff",
-                      textPrimary: resolvedTheme === 'dark' ? "#ffffff" : "#111827",
-                      textSecondary: resolvedTheme === 'dark' ? "#8E9196" : "#6b7280",
-                    }}
-                    style={{ flex: 1, width: "100%", height: "100%" }}
-                  />
-                )}
+            {/* New Main Content Area with conditional backgrounds */}
+            <div className="flex-1 p-4 md:p-8 overflow-y-auto bg-zinc-100 dark:bg-[#090a0c]">
+              <div className="h-full w-full max-w-6xl mx-auto rounded-xl overflow-hidden border border-zinc-200 dark:border-[#1F2226] shadow-2xl relative">
+                <div className="absolute inset-0 [&_*]:!h-full [&_iframe]:!h-full [&_iframe]:!border-none">
+                  {mounted && (
+                    <DocViewer
+                      key={resolvedTheme} // Forces re-initialization on theme switch
+                      documents={[{ uri: viewFile.url, fileName: viewFile.name }]}
+                      pluginRenderers={DocViewerRenderers}
+                      style={{ width: "100%", height: "100%" }}
+                      config={{
+                        header: {
+                          disableHeader: true,
+                        },
+                      }}
+                      theme={{
+                        primary: "#00D084",
+                        secondary: resolvedTheme === "dark" ? "#08090A" : "#ffffff",
+                        tertiary: resolvedTheme === "dark" ? "#111317" : "#f4f4f5",
+                        textPrimary: resolvedTheme === "dark" ? "#ffffff" : "#090a0c",
+                        textSecondary: resolvedTheme === "dark" ? "#8E9196" : "#71717a",
+                        disableThemeScrollbar: false,
+                      }}
+                    />
+                  )}
                 </div>
+              </div>
             </div>
-            </div>
+          </div>
         )}
       </div>
     </div>

@@ -106,29 +106,22 @@ export const GeneratedCard: React.FC<GeneratedCardProps> = ({ id, title, subject
           
           {/* Main Content Area - overflow-y-auto enables scrolling for the document */}
           <div className="flex-1 p-4 md:p-8 overflow-y-auto bg-zinc-100 dark:bg-[#090a0c]">
-            <div className="min-h-full w-full max-w-5xl mx-auto rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xl relative bg-white dark:bg-[#121417] overflow-hidden">
-              <div className="w-full h-full min-h-[80vh] [&_*]:!h-full [&_iframe]:!h-full [&_iframe]:!border-none">
-                {mounted && (
-                  <DocViewer 
-                    key={resolvedTheme}
+          <div className="h-full w-full max-w-6xl mx-auto rounded-xl overflow-hidden border border-[#1F2226] shadow-2xl relative">
+        <div className="absolute inset-0 [&_*]:h-full [&_iframe]:!h-full [&_iframe]:!border-none">
+          <DocViewer
                     documents={[{ uri: pdf_url, fileName: title }]} 
-                    pluginRenderers={DocViewerRenderers}
-                    config={{ 
-                      header: { disableHeader: true },
-                      pdfVerticalScrollByDefault: true,
-                    }}
-                    theme={{
-                      primary: "#10b981",
-                      secondary: resolvedTheme === 'dark' ? "#0c0d0f" : "#f3f4f6",
-                      tertiary: resolvedTheme === 'dark' ? "#121417" : "#f9fafb",
-                      textPrimary: resolvedTheme === 'dark' ? "#ffffff" : "#111827",
-                      textSecondary: resolvedTheme === 'dark' ? "#a1a1aa" : "#6b7280",
-                    }}
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                )}
-              </div>
-            </div>
+            pluginRenderers={DocViewerRenderers}
+            config={{ header: { disableHeader: true } }}
+            theme={{
+              primary: "#00D084",
+              secondary: "#08090A",
+              tertiary: "#111317",
+              textPrimary: "#ffffff",
+              textSecondary: "#8E9196",
+            }}
+          />
+        </div>
+      </div>
           </div>
         </div>
       )}

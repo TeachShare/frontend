@@ -10,7 +10,7 @@ import { ResourceCard } from '@/components/sections/resources/ResourceCard';
 import { ResourcePagination } from '@/components/sections/resources/ResourcePagination';
 import { SkeletonResourceCard } from '@/components/sections/resources/ResourceSkeletons';
 import { Button } from '@/components/ui/Button';
-import { Plus, Grid, List, Trash2, Shield, ShieldOff, Check, X, Loader2, BookOpen } from 'lucide-react';
+import { Plus, Grid, List, Trash2, Shield, ShieldOff, Check, X, Loader2, BookOpen, Star } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface Resource {

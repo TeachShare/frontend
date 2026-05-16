@@ -4,7 +4,7 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { ResourceCardProps } from "@/types/resources";
 import { api } from "@/lib/axios"; 
-import { Loader2, Trash2, AlertTriangle, X, FileText, Eye, Edit3, GitBranch } from "lucide-react"; 
+import { Loader2, Trash2, AlertTriangle, X, FileText, Eye, Edit3, GitBranch, Star } from "lucide-react"; 
 import { toast } from "react-hot-toast";
 
 interface ExtendedResourceCardProps extends ResourceCardProps {
